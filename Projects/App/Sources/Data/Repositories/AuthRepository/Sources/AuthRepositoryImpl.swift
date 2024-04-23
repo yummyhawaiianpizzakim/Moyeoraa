@@ -1,0 +1,77 @@
+//
+//  AuthRepositoryImpl.swift
+//  AuthRepositoryInterface
+//
+//  Created by 김요한 on 2024/04/16.
+//  Copyright © 2024 com.moyeora. All rights reserved.
+//
+
+import RxSwift
+
+public final class AuthRepositoryImpl: AuthRepositoryProtocol {
+    private let firebaseService: FireBaseServiceProtocol
+    private let tokenManager: TokenManagerProtocol
+    
+    public init(firebaseService: FireBaseServiceProtocol,
+                tokenManager: TokenManagerProtocol) {
+        self.firebaseService = firebaseService
+        self.tokenManager = tokenManager
+    }
+    
+    public func checkUser(uid: String) -> Single<Bool> {
+        self.tokenManager.save(token: uid, with: .userId)
+        
+        return self.firebaseService.getDocument(
+            collection: .users,
+            field: "id",
+            in: [uid]
+        )
+        .map { !$0.isEmpty }
+    }
+    
+    public func createUser(name: String, profileURL: String?, tagNumber: Int) -> Observable<Void> {
+        guard let userID = self.tokenManager.getToken(with: .userId),
+              let fcmToken = self.tokenManager.getToken(with: .fcmToken)
+        else { return .error(RxError.unknown) }
+        
+        let userDTO = UserDTO(
+            id: userID,
+            name: name,
+            tagNumber: tagNumber,
+            profileImage: profileURL,
+            fcmToken: fcmToken
+        )
+        
+        guard let values = userDTO.asDictionary else {
+            return .error(RxError.unknown)
+        }
+        
+        return self.firebaseService.createDocument(
+            collection: .users,
+            document: userDTO.id,
+            values: values
+        )
+        .asObservable()
+        .debug("createDocument")
+    }
+    
+    public func updateFcmToken() -> Observable<Void> {
+        guard
+            let userID = tokenManager.getToken(with: .userId),
+            let fcmToken = tokenManager.getToken(with: .fcmToken)
+        else {
+            return .error(RxError.unknown)
+        }
+        
+        let values = ["fcmToken": fcmToken]
+        print("userID \(userID) fcmToken \(fcmToken)")
+        
+        return self.firebaseService.updateDocument(
+            collection: .users,
+            document: userID,
+            values: values
+        )
+        .asObservable()
+        .debug("updateFcmToken")
+    }
+}

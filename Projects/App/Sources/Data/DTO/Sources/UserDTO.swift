@@ -26,4 +26,15 @@ public struct UserDTO: Codable {
         self.profileImage = profileImage
         self.fcmToken = fcmToken
     }
+    
+    public func toEntity() -> User {
+        return .init(
+            id: self.id,
+            name: self.name,
+            tagNumber: self.tagNumber,
+            profileImage: self.profileImage,
+            fcmToken: self.fcmToken,
+            isNotification: false
+        )
+    }
 }

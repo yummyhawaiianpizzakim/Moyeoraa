@@ -28,6 +28,19 @@ public extension Date {
         let localizedDate = self.addingTimeInterval(TimeInterval(secondsFromGMT))
         return localizedDate
     }
+    
+    static func fromStringOrNow(_ string: String) -> Date {
+        let formatter = DateFormatter()
+        
+        formatter.dateFormat = "yyyy. MM. dd HH:mm"
+        formatter.locale = Locale(identifier: "ko_KR")
+        
+        if formatter.date(from: string) == nil {
+            print("string -> date failed.")
+        }
+        
+        return formatter.date(from: string) ?? Date()
+    }
 }
 
 public extension String {

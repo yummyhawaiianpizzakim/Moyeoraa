@@ -25,7 +25,21 @@ public final class CreatePlansCoordinator: CoordinatorProtocol {
     }
     
     private func showCreatePlansViewModel() {
-        let createPlansUseCase = CreatePlansUseCaseSpy()
+        let firebaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let plansRepository = PlansRepositoryImpl(firebaseService: firebaseService,
+                                                  tokenManager: tokenManager)
+        let userRepository = UserRepositoryImpl(firebaseService: firebaseService, 
+                                                tokenManager: tokenManager)
+        let chatRepository = ChatRepositoryImpl(firebaseService: firebaseService, 
+                                                tokenManager: tokenManager)
+        
+        let createPlansUseCase = CreatePlansUseCaseImpl(
+            plansRepository: plansRepository,
+            userRepository: userRepository,
+            chatRepository: chatRepository)
+        
         let vm = CreatePlansViewModel(createPlansUseCase: createPlansUseCase)
         
         vm.setAction(
@@ -38,6 +52,7 @@ public final class CreatePlansCoordinator: CoordinatorProtocol {
         )
         
         let vc = CreatePlansFeature(viewModel: vm)
+        vc.hidesBottomBarWhenPushed = true
         
         self.navigation.pushViewController(vc, animated: true)
     }

@@ -33,6 +33,7 @@ public final class SignInCoordinator: CoordinatorProtocol {
             firebaseService: firebaseService,
             tokenManager: tokenManager
         )
+        
         let signInUseCase = SignInUseCaseImpl(authRepository: authRepository)
         let vm = SignInViewModel(
             signInUseCase: signInUseCase

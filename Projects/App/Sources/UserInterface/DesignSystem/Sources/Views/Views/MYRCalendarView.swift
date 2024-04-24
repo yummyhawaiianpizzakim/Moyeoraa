@@ -19,10 +19,11 @@ public final class MYRCalendarView: UIView {
     }
     
     public let disposeBag = DisposeBag()
+    private lazy var calendar = Calendar.current
     private var hadPlans: [Date] = []
     public let selectedDate = BehaviorRelay<Date>(value: Date())
     
-    public lazy var calendar: UICalendarView = {
+    public lazy var calendarView: UICalendarView = {
         let view = UICalendarView()
         view.tintColor = .moyeora(.primary(.primary1))
         view.locale = .init(identifier: "ko_KR")
@@ -38,9 +39,9 @@ public final class MYRCalendarView: UIView {
     public init(feature: MYRCalendarView.Feature) {
         super.init(frame: .zero)
         
+        self.configureAttribute()
         self.configureCalendar(feature: feature)
         self.configureUI()
-        self.configureAttribute()
     }
     
     required init?(coder: NSCoder) {
@@ -53,12 +54,13 @@ private extension MYRCalendarView {
         self.clipsToBounds = true
         self.layer.cornerRadius = MYRConstants.cornerRadiusMedium
         self.backgroundColor = .moyeora(.neutral(.gray5))
+        self.calendar.locale = .init(identifier: "ko_KR")
         
     }
     
     func configureUI() {
-        self.addSubview(self.calendar)
-        self.calendar.snp.makeConstraints { make in
+        self.addSubview(self.calendarView)
+        self.calendarView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
     }
@@ -66,10 +68,10 @@ private extension MYRCalendarView {
     func configureCalendar(feature: MYRCalendarView.Feature) {
         switch feature {
         case .home:
-            self.calendar.delegate = self
+            self.calendarView.delegate = self
             return
         case .ceate:
-            self.calendar.delegate = nil
+            self.calendarView.delegate = nil
             return
         }
     }
@@ -85,14 +87,18 @@ public extension MYRCalendarView {
 extension MYRCalendarView: UICalendarViewDelegate, UICalendarSelectionSingleDateDelegate {
     public func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
         guard let selectionDate = selection.selectedDate,
-              let date = selectionDate.date
+              var date = selectionDate.date
         else { return }
+        
+        if selectionDate.day == self.calendar.component(.day, from: Date()) {
+            date = Date()
+        }
         self.selectedDate.accept(date)
     }
     
     public func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
         guard let date = dateComponents.date else { return nil}
-        let dateCount = hadPlans.filter { Calendar.current.isDate($0, inSameDayAs: date) }.count
+        let dateCount = hadPlans.filter { self.calendar.isDate($0, inSameDayAs: date) }.count
         
         guard dateCount > 0 else { return nil }
         
@@ -152,7 +158,7 @@ extension MYRCalendarView: UICalendarViewDelegate, UICalendarSelectionSingleDate
     
     private func createDateComponents() -> DateComponents? {
         let today = Date()
-        var calendar = Calendar.autoupdatingCurrent
+        var calendar = self.calendar
         guard let timeZone = TimeZone.init(identifier: "Asia/Seoul")
         else { return nil }
         calendar.timeZone = timeZone

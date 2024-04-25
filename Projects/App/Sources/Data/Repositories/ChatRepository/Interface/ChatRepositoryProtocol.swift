@@ -10,5 +10,6 @@ import Foundation
 import RxSwift
 
 public protocol ChatRepositoryProtocol: AnyObject {
-    func createChatRoom(plansID: String) -> Observable<String> 
+    func createChatRoom(plansID: String) -> Observable<String>
+    func observeChatRooms(plansIDs: [String]) -> Observable<[ChatRoom]>
 }

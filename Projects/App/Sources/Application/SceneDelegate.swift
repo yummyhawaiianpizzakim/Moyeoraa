@@ -1,4 +1,5 @@
 import UIKit
+import RxSwift
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -13,13 +14,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         
         let nv = UINavigationController()
-//        let coor = SignInCoordinator(navigation: nv)
-        let coor  = AppCoordinator(navigation: nv)
-//        let coor = MainTabBarCoordinator(navigation: nv)
+        let coor = AppCoordinator(navigation: nv)
         self.window?.rootViewController = nv
         self.window?.backgroundColor = .systemBackground
         coor.start()
         self.window?.makeKeyAndVisible()
+        
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {}

@@ -27,7 +27,7 @@ public final class ChatRepositoryImpl: ChatRepositoryProtocol {
             id: UUID().uuidString,
             userID: userID,
             plansID: plansID,
-            updatedAt: Date().toStringWithCustomFormat("yyyy. MM. dd HH:mm", locale: .current)
+            updatedAt: Date().toStringWithCustomFormat(.timeStamp, locale: .current)
         )
         
         guard let values = dto.asDictionary else {
@@ -41,5 +41,22 @@ public final class ChatRepositoryImpl: ChatRepositoryProtocol {
         )
         .asObservable()
         .map { dto.id }
+    }
+    
+    func fetchChatRooms(plansIDs: [String]) -> Observable<[ChatRoom]> {
+        return self.firebaseService
+            .getDocument(collection: .chatrooms, field: "plansID", in: plansIDs)
+            .asObservable()
+            .map { $0.compactMap { $0.toObject(ChatRoomDTO.self) } }
+            .map { $0.map { $0.toEntity() } }
+    }
+    
+    public func observeChatRooms(plansIDs: [String]) -> Observable<[ChatRoom]> {
+        self.firebaseService
+            .observe(collection: .chatrooms, field: "plansID", in: plansIDs)
+            .asObservable()
+            .debug("observeChatRooms")
+            .map { $0.compactMap { $0.toObject(ChatRoomDTO.self) } }
+            .map { $0.map { $0.toEntity() } }
     }
 }

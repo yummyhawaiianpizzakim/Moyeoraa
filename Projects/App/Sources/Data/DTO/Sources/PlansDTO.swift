@@ -40,4 +40,28 @@ public struct PlansDTO: Codable {
         self.chatRoomID = chatRoomID
         self.status = status.rawValue
     }
+    
+    func toEntity() -> Plans {
+        var status: Plans.Status
+        
+        if self.status == "active" {
+            status = Plans.Status.active
+        } else {
+            status = Plans.Status.inactive
+        }
+        
+        return .init(
+            id: self.id,
+            title: self.title,
+            date: Date().stringToDate(dateString: self.date, type: .yearToMinute) ?? Date(),
+            location: self.location,
+            latitude: self.latitude,
+            longitude: self.longitude,
+            imageURLString: self.imageURLString,
+            makingUserID: self.makingUserID,
+            usersID: self.usersID,
+            chatRoomID: self.chatRoomID,
+            status: status
+        )
+    }
 }

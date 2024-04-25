@@ -16,6 +16,7 @@ public protocol FireBaseServiceProtocol {
     func getDocument(collection: FireStoreCollection) -> Single<[FirebaseData]>
     func getDocument(collection: FireStoreCollection, document: String) -> Single<FirebaseData>
     func getDocument(collection: FireStoreCollection, field: String, condition: [String]) -> Single<[FirebaseData]>
+    func getDocument(collection: FireStoreCollection, field: String, arrayContainsAny: [String]) -> Single<[FirebaseData]> 
     func getDocument(collection: FireStoreCollection, field: String, in values: [Any]) -> Single<[FirebaseData]>
     func getDocument(documents: [String]) -> Single<FirebaseData>
     
@@ -28,6 +29,7 @@ public protocol FireBaseServiceProtocol {
     
     func observer(collection: FireStoreCollection, document: String) -> Observable<FirebaseData>
     func observer(documents: [String]) -> Observable<FirebaseData>
+    func observe(collection: FireStoreCollection, field: String, in values: [Any]) -> Observable<[FirebaseData]>
     
     func uploadImage(imageData: Data) -> Single<String>
 }

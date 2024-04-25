@@ -10,10 +10,10 @@ import Foundation
 
 public extension Date {
     enum Format: String {
-        case yearToDay = "yyyy.MM.dd"
-        case yearToSecond = "yyyy-MM-dd HH:mm:ss"
+        case yearToDay = "yyyy. MM. dd"
+        case yearToSecond = "yyyy. MM. dd HH:mm:ss"
         case yearToMinute = "yy. MM. dd HH:mm"
-        case timeStamp = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        case timeStamp = "yyyy. MM. dd'T'HH:mm:ss.SSS'Z'"
         case hourAndMinute = "HH:mm"
         case monthAndDate = "M월 d일"
         case monthAndDate2 = "MM/dd"

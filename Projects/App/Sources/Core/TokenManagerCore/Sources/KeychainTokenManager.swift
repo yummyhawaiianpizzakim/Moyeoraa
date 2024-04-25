@@ -41,7 +41,7 @@ public final class KeychainTokenManager: TokenManagerProtocol {
         else {
             return nil
         }
-        
+        print("token  \(token)")
         return token
     }
     

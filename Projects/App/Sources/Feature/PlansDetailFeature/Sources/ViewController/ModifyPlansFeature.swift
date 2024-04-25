@@ -118,7 +118,7 @@ public final class ModifyPlansFeature: BaseFeature {
 //            .debug("selectedDate")
             .compactMap({ $0 })
             .map({ date in
-                date.toStringWithCustomFormat("MM. dd. HH:mm", locale: nil)
+                date.toStringWithCustomFormat(.yearToMinute, locale: nil)
             })
             .drive(with: self) { owner, dateString in
                 print(dateString)

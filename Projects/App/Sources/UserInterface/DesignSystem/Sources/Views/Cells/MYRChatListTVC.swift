@@ -105,7 +105,7 @@ private extension MYRChatListTVC {
 
 public extension MYRChatListTVC {
     func bindPlansInfo(profileURL: String, title: String, location: String, date: Date) {
-        let dateString = date.toStringWithCustomFormat("MM월 dd일 HH:mm")
+        let dateString = date.toStringWithCustomFormat(.yearToMinute)
         self.profileView.bindImage(urlString: profileURL)
         self.titleLabel.setText(with: title)
         self.locationLabel.setText(with: location)
@@ -113,7 +113,7 @@ public extension MYRChatListTVC {
     }
     
     func bindChatInfo(time: Date, isChecked: Bool) {
-        let timeString = time.toStringWithCustomFormat("HH:mm")
+        let timeString = time.toStringWithCustomFormat(.hourAndMinute)
         self.lastSendedTimeLabel.setText(with: timeString)
         if isChecked {
             self.readIcon.backgroundColor = .moyeora(.neutral(.gray4))

@@ -44,7 +44,7 @@ public final class TimeCVC: UICollectionViewCell {
     }
     
     public func bindCell(with date: Date) {
-        self.timeLabel.text = date.toStringWithCustomFormat("HH:mm")
+        self.timeLabel.text = date.toStringWithCustomFormat(.hourAndMinute)
     }
     
     private func updateSelectionAttributes(_ isSelected: Bool) {

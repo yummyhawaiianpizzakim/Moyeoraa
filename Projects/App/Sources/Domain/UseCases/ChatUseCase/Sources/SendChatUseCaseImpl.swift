@@ -9,10 +9,13 @@
 import RxSwift
 
 public final class SendChatUseCaseImpl: SendChatUseCaseProtocol {
-    public init() {
-        
+    private let chatRepository: ChatRepositoryProtocol
+    
+    public init(chatRepository: ChatRepositoryProtocol) {
+        self.chatRepository = chatRepository
     }
+    
     public func send(content: String, chatRoomID: String) -> Observable<Void> {
-        return Observable.just(())
+       return self.chatRepository.send(content: content, at: chatRoomID)
     }
 }

@@ -10,13 +10,15 @@ import Foundation
 import RxSwift
 
 public final class UpdateIsCheckedUseCaseImpl: UpdateIsCheckedUseCaseProtocol {
-    public init() {
-        
+    
+    private let chatRepository: ChatRepositoryProtocol
+    
+    public init(chatRepository: ChatRepositoryProtocol) {
+        self.chatRepository = chatRepository
     }
     
     public func update(chatroomId: String, chatId: String) -> Observable<Void> {
-        
-        return Observable.just(())
+        self.chatRepository.updateIsChecked(chatroomId: chatroomId, chatId: chatId, toState: true)
     }
     
 }

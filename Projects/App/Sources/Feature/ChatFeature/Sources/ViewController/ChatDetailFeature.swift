@@ -21,6 +21,7 @@ public final class ChatDetailFeature: BaseFeature {
         view.register(ChatTVC.self)
         view.separatorStyle = .none
         view.allowsSelection = false
+        view.keyboardDismissMode = .onDrag
         return view
     }()
     
@@ -29,6 +30,7 @@ public final class ChatDetailFeature: BaseFeature {
     public init(viewModel: ChatDetailViewModel) {
         self.viewModel = viewModel
         super.init()
+        self.bindUI()
     }
     
     public override func configureAttributes() {
@@ -36,7 +38,7 @@ public final class ChatDetailFeature: BaseFeature {
         let view = MYRNavigationView(title: title)
         self.setNavigationBar(isBackButton: true, titleView: view, rightButtonItem: nil)
         
-        chatInputView.mapButtonDidTap
+        self.chatInputView.mapButtonDidTap
             .subscribe { _ in
                 print("aaaa")
             }
@@ -59,6 +61,14 @@ public final class ChatDetailFeature: BaseFeature {
             make.bottom.equalTo(self.view.safeAreaLayoutGuide)
             make.height.equalTo(56)
         }
+    }
+    
+    private func bindUI() {
+        self.chatInputView.followKeyboardObserver()
+            .disposed(by: self.disposeBag)
+        
+        self.chatTableView.followKeyboardObserver()
+            .disposed(by: self.disposeBag)
     }
     
     public override func bindViewModel() {

@@ -12,4 +12,7 @@ import RxSwift
 public protocol ChatRepositoryProtocol: AnyObject {
     func createChatRoom(plansID: String) -> Observable<String>
     func observeChatRooms(plansIDs: [String]) -> Observable<[ChatRoom]>
+    func observeChat(chatRoomID: String) -> Observable<[Chat]>
+    func send(content: String, at chatRoomId: String) -> Observable<Void>
+    func updateIsChecked(chatroomId: String, chatId: String, toState state: Bool) -> Observable<Void>
 }

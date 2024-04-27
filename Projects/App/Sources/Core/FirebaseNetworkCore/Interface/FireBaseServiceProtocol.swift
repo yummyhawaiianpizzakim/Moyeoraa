@@ -30,6 +30,7 @@ public protocol FireBaseServiceProtocol {
     func observer(collection: FireStoreCollection, document: String) -> Observable<FirebaseData>
     func observer(documents: [String]) -> Observable<FirebaseData>
     func observe(collection: FireStoreCollection, field: String, in values: [Any]) -> Observable<[FirebaseData]>
+    func observe(documents: [String]) -> Observable<[FirebaseData]>
     
     func uploadImage(imageData: Data) -> Single<String>
 }

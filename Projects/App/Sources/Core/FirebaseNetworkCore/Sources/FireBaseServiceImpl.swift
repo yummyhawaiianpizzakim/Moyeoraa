@@ -289,7 +289,26 @@ public extension FireBaseServiceImpl {
                     }
                 return Disposables.create()
             }
+    }
+    
+    func observe(documents: [String]) -> Observable<[FirebaseData]> {
+        return Observable.create { [weak self] observable in
+            guard let self else { return Disposables.create() }
+            self.database
+                .collection(documents.joined(separator: "/"))
+                .addSnapshotListener { snapshot, error in
+                    if let error = error { observable.onError(error) }
+                    guard let snapshot = snapshot else {
+                        observable.onError(FireStoreError.unknown)
+                        return
+                    }
+                    let data = snapshot.documents.map { $0.data() }
+                    
+                    observable.onNext(data)
+                }
+            return Disposables.create()
         }
+    }
 }
     //MARK: Image
 public extension FireBaseServiceImpl {

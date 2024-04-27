@@ -28,7 +28,7 @@ public final class KeychainTokenManager: TokenManagerProtocol {
         var item: CFTypeRef?
         
         let status = SecItemCopyMatching(query as CFDictionary, &item)
-        print("get status \(status)")
+//        print("get status \(status)")
         guard status == errSecSuccess else {
             print(status)
             return nil
@@ -41,7 +41,7 @@ public final class KeychainTokenManager: TokenManagerProtocol {
         else {
             return nil
         }
-        print("token  \(token)")
+//        print("token  \(token)")
         return token
     }
     
@@ -59,10 +59,10 @@ public final class KeychainTokenManager: TokenManagerProtocol {
         if status == errSecSuccess {
             return true
         } else if status == errSecDuplicateItem {
-            print("save status \(status)")
+//            print("save status \(status)")
             return update(tokenData: tokenData, with: key)
         } else {
-            print("save status \(status)")
+//            print("save status \(status)")
             return false
         }
     }

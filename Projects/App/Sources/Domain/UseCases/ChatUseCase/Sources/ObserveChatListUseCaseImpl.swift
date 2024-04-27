@@ -19,7 +19,7 @@ public final class ObserveChatListUseCaseImpl: ObserveChatListUseCaseProtocol {
         self.plansRepository = plansRepository
     }
     
-    public func observe() -> Observable<([ChatRoom], [Plans])> {
+    public func observe() -> Observable<([ChatRoom], [Plans], [Chat])> {
         let plansArr = self.plansRepository.fetchPlansArr()
         let chatRooms = plansArr.map { $0.map { $0.id } }
             .withUnretained(self)
@@ -27,25 +27,19 @@ public final class ObserveChatListUseCaseImpl: ObserveChatListUseCaseProtocol {
                 $0.0.chatRepository.observeChatRooms(plansIDs: $0.1)
             }
         
-        return Observable.combineLatest(plansArr, chatRooms)
+        let chats = chatRooms
             .withUnretained(self)
-            .map({ owner, val in
-                let (plansArr, chatRooms) = val
-                return owner.mapPlansAndChatRoom(chatRooms: chatRooms, plansArr: plansArr)
-            })
-    }
-    
-    private func mapPlansAndChatRoom(chatRooms: [ChatRoom], plansArr: [Plans]) -> (([ChatRoom], [Plans])) {
-        var resultTuple: ([ChatRoom], [Plans]) = ([], [])
-        
-        plansArr.forEach { plans in
-            chatRooms.forEach { chatRoom in
-                if plans.id == chatRoom.plansID {
-                    resultTuple.0.append(chatRoom)
-                    resultTuple.1.append(plans)
+//            .debug("chats")
+            .flatMap { owner, chatRooms -> Observable<[Chat]> in
+                let chatObservables = chatRooms.map { chatRoom -> Observable<Chat?> in
+                    owner.chatRepository.observeChat(chatRoomID: chatRoom.id)
+                        .compactMap { $0.last }
+                        .catchAndReturn(nil)
                 }
+                return Observable.combineLatest(chatObservables)
+                    .map { $0.compactMap { $0 } } // nil 값을 제거하고 Chat 객체만 배열로 반환
             }
-        }
-        return resultTuple
+  
+        return Observable.combineLatest(chatRooms, plansArr, chats)
     }
 }

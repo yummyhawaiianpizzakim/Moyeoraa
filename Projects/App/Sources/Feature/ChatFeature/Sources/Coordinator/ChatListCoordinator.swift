@@ -26,8 +26,18 @@ public final class ChatListCoordinator: CoordinatorProtocol {
     }
     
     private func showChatListFeature() {
-        let uc = ObserveChatListUseCaseSpy()
-        let vm = ChatListViewModel(fetchChatUseCase: uc)
+//        let uc = ObserveChatListUseCaseSpy()
+        
+        let firebaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let plansRepository = PlansRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let chatRepository =  ChatRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        
+        let fetchChatUseCase = ObserveChatListUseCaseImpl(chatRepository: chatRepository, plansRepository: plansRepository)
+        
+        let vm = ChatListViewModel(fetchChatUseCase: fetchChatUseCase)
+        
         let vc = ChatListFeature(viewModel: vm)
         vm.setAction(
             ChatListViewModelActions(

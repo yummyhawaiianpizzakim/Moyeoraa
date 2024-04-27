@@ -65,6 +65,27 @@ public final class FireBaseServiceImpl: FireBaseServiceProtocol {
         }
     }
     
+    public func getDocument(collection: FireStoreCollection, field: String, arrayContainsAny: [String]) -> Single<[FirebaseData]> {
+        return Single.create { [weak self] single in
+            guard let self else { return Disposables.create() }
+            
+            self.database.collection(collection.name)
+                .whereField(field, arrayContainsAny: arrayContainsAny)
+                .getDocuments { snapshot, error in
+                    if let error = error { single(.failure(error)) }
+                    
+                    guard let snapshot = snapshot else {
+                        single(.failure(FireStoreError.unknown))
+                        return
+                    }
+                    
+                    let data = snapshot.documents.map { $0.data() }
+                    single(.success(data))
+                }
+            return Disposables.create()
+        }
+    }
+    
     public func getDocument(collection: FireStoreCollection, field: String, in values: [Any]) -> Single<[FirebaseData]> {
         return Single.create { [weak self] single in
             guard let self else { return Disposables.create() }
@@ -237,6 +258,51 @@ public extension FireBaseServiceImpl {
                         observable.onError(FireStoreError.unknown)
                         return
                     }
+                    
+                    observable.onNext(data)
+                }
+            return Disposables.create()
+        }
+    }
+    
+    func observe(collection: FireStoreCollection, field: String, in values: [Any]) -> Observable<[FirebaseData]> {
+            return Observable.create { [weak self] observable in
+                guard let self else { return Disposables.create() }
+                
+                var queries = values
+                if queries.isEmpty { queries.append("") }
+                
+                self.database
+                    .collection(collection.name)
+                    .whereField(field, in: queries)
+                    .addSnapshotListener { snapshot, error in
+                        if let error = error {
+                            observable.onError(error)
+                        }
+                        guard let snapshot = snapshot else {
+                            observable.onError(FireStoreError.unknown)
+                            return
+                        }
+                        let data = snapshot.documents.map { $0.data() }
+                        
+                        observable.onNext(data)
+                    }
+                return Disposables.create()
+            }
+    }
+    
+    func observe(documents: [String]) -> Observable<[FirebaseData]> {
+        return Observable.create { [weak self] observable in
+            guard let self else { return Disposables.create() }
+            self.database
+                .collection(documents.joined(separator: "/"))
+                .addSnapshotListener { snapshot, error in
+                    if let error = error { observable.onError(error) }
+                    guard let snapshot = snapshot else {
+                        observable.onError(FireStoreError.unknown)
+                        return
+                    }
+                    let data = snapshot.documents.map { $0.data() }
                     
                     observable.onNext(data)
                 }

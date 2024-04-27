@@ -128,7 +128,7 @@ public final class PlansDetailFeature: BaseFeature {
         .disposed(by: self.disposeBag)
         
         output.date.drive(with: self) { owner, date in
-            let dateString = date.toStringWithCustomFormat("MM. dd. HH:mm")
+            let dateString = date.toStringWithCustomFormat(.yearToMinute)
             owner.dateLabel.setText(with: dateString)
         }
         .disposed(by: self.disposeBag)

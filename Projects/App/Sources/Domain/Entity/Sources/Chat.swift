@@ -15,6 +15,7 @@ public struct Chat {
      }
      
     public let id: String
+    public let chatRoomID: String
     public let senderUserID: String
     public let senderType: SenderType
     public let content: String
@@ -24,14 +25,16 @@ public struct Chat {
     public var user: User?
     
     public init(id: String,
-         senderUserID: String,
-         senderType: SenderType,
-         content: String,
-         createdAt: Date,
-         isChecked: Bool,
-         user: User? = nil
+                chatRoomID: String,
+                senderUserID: String,
+                senderType: SenderType,
+                content: String,
+                createdAt: Date,
+                isChecked: Bool,
+                user: User? = nil
     ) {
         self.id = id
+        self.chatRoomID = chatRoomID
         self.senderUserID = senderUserID
         self.senderType = senderType
         self.content = content

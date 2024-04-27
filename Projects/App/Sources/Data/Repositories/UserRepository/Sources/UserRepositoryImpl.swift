@@ -36,8 +36,9 @@ public final class UserRepositoryImpl: UserRepositoryProtocol {
     
     
     public func getUsersInfo(_ ids: [String]) -> Observable<[User]> {
-        return Observable.just([])
+        return self.firebaseService
+            .getDocument(collection: .users, field: "id", in: ids)
+            .map { $0.compactMap { $0.toObject(UserDTO.self)?.toEntity() } }
+            .asObservable()
     }
-    
-    
 }

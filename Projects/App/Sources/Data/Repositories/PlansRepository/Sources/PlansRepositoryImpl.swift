@@ -30,12 +30,12 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
         let dto = PlansDTO(
             id: plansID,
             title: title,
-            date: date.toStringWithCustomFormat("yyyy. MM. dd HH:mm", locale: .current),
+            date: date.toStringWithCustomFormat(.hourAndMinute, locale: .current),
             location: location.name,
             latitude: location.lat,
             longitude: location.lng,
             makingUserID: makingUser.id,
-            usersID: membersID,
+            usersID: membersID + [makingUser.id],
             chatRoomID: chatRoomID,
             status: .active
         )
@@ -51,4 +51,20 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
             .asObservable()
     }
     
+    
+    public func fetchPlansArr() -> Observable<[Plans]> {
+        guard let userID = self.tokenManager.getToken(with: .userId)
+        else { return .error(TokenManagerError.notFound)}
+        
+        return self.firebaseService
+            .getDocument(
+                collection: .plans,
+                field: "usersID",
+                arrayContainsAny: [userID]
+            )
+            .asObservable()
+            .map { 
+                $0.compactMap { $0.toObject(PlansDTO.self)?.toEntity() }
+            }
+    }
 }

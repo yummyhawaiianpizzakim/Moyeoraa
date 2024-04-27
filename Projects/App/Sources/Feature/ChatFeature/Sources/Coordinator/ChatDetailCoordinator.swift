@@ -33,17 +33,26 @@ public final class ChatDetailCoordinator: CoordinatorProtocol {
     }
     
     private func showChatDetailFeature() {
-        let uc = ObserveChatUseCaseSpy()
-        let uc1 = SendChatUseCaseSpy()
-        let uc2 = UpdateIsCheckedUseCaseSpy()
+        let firebaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let chatRepository = ChatRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        
+        let observeChatUseCase = ObserveChatUseCaseImpl(chatRepository: chatRepository, userRepository: userRepository)
+        let sendChatUseCase = SendChatUseCaseImpl(chatRepository: chatRepository)
+        let updateIsCheckedUseCase = UpdateIsCheckedUseCaseImpl(chatRepository: chatRepository)
+        
         let vm = ChatDetailViewModel(
             chatRoomID: self.chatRoomID,
             chatRoomTitle: self.chatRoomTitle,
-            observeChatUseCase: uc,
-            sendChatUseCase: uc1,
-            updateIsCheckedUseCase: uc2
+            observeChatUseCase: observeChatUseCase,
+            sendChatUseCase: sendChatUseCase,
+            updateIsCheckedUseCase: updateIsCheckedUseCase
         )
+        
         let vc = ChatDetailFeature(viewModel: vm)
+        vc.hidesBottomBarWhenPushed = true
         
         self.navigation.pushViewController(vc, animated: true)
     }

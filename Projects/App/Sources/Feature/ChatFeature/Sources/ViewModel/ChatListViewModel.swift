@@ -18,9 +18,11 @@ public final class ChatListViewModel: BaseViewModel {
     public typealias Action = ChatListViewModelActions
     public let disposeBag = DisposeBag()
     public var actions: Action?
+    
     public let fetchChatUseCase: ObserveChatListUseCaseProtocol
     
-    public init(fetchChatUseCase: ObserveChatListUseCaseProtocol) {
+    public init(fetchChatUseCase: ObserveChatListUseCaseProtocol
+    ) {
         self.fetchChatUseCase = fetchChatUseCase
     }
     
@@ -35,19 +37,21 @@ public final class ChatListViewModel: BaseViewModel {
     
     public func trnasform(input: Input) -> Output {
         let chatLists = input.viewDidAppear
-//            .debug("viewDidAppear")
+            .debug("viewDidAppear")
             .withUnretained(self)
-            .flatMap { owner, _ -> Observable<[ChatList]> in
+            .flatMap { owner, _ -> Observable<([ChatRoom], [Plans], [Chat])> in
                 owner.fetchChatUseCase.observe()
-                    .map { val in
-                        let (chatRooms, plansArr) = val
-                        return owner.mapChatLists(chatRooms: chatRooms, plansArr: plansArr)
-                    }
             }
+            .withUnretained(self)
+            .map({ owner, val -> [ChatList] in
+                let (chatRooms, plans, chats) = val
+                return owner.mapPlansAndChatRoom(chatRooms: chatRooms, plansArr: plans, chats: chats)
+            })
+            .map({ $0.sorted { $0.updateAt > $1.updateAt } })
             .asDriver(onErrorJustReturn: [])
-        
+        //
         input.cellDidSelect
-//            .debug("cellDidSelect")
+        //            .debug("cellDidSelect")
             .subscribe(with: self) { owner, chatList in
                 guard let chatList else { return }
                 owner.actions?.showChatDetailFeature(chatList.chatroomId, chatList.title)
@@ -60,20 +64,51 @@ public final class ChatListViewModel: BaseViewModel {
     public func setAction(_ actions: ChatListViewModelActions) {
         self.actions = actions
     }
-    
 }
 
 private extension ChatListViewModel {
-    func mapChatLists(chatRooms: [ChatRoom], plansArr: [Plans]) -> [ChatList] {
-        var chatLists: [ChatList] = []
-        chatRooms.forEach { chatRoom in
-            plansArr.forEach { plans in
-                if chatRoom.plansID == plans.id {
-                    let chatList = ChatList(chatroomId: chatRoom.id, PlansId: plans.id, profileImage: plans.imageURLString, title: plans.title, location: plans.location, date: plans.date, updateAt: chatRoom.updatedAt, isChecked: false)
-                    chatLists.append(chatList)
+    func mapPlansAndChatRoom(chatRooms: [ChatRoom], plansArr: [Plans], chats: [Chat]) -> [ChatList] {
+        // plansArr을 Dictionary로 변환하여 O(1) 접근이 가능하도록 함
+        let plansDict = Dictionary(uniqueKeysWithValues: plansArr.map { ($0.id, $0) })
+        
+        // chatRooms을 Dictionary로 변환하여 O(1) 접근이 가능하도록 함
+        let chatRoomDict = Dictionary(uniqueKeysWithValues: chatRooms.map({ ($0.plansID, $0) }))
+        
+        // chats를 chatRoomID를 기준으로 Dictionary로 변환
+        let chatDict = Dictionary(uniqueKeysWithValues: chats.map({ ($0.chatRoomID, $0) }))
+        
+        // 결과를 저장할 배열
+        //        var mappedResults = [MappedObject]()
+        var mappedResults = [ChatList]()
+        
+        for (id, plans) in plansDict {
+            if let chatRoom = chatRoomDict[id] {
+                let chat = chatDict[chatRoom.id]
+                
+                var isChecked = false
+                if chat?.senderType == .mine {
+                    isChecked = true
+                } else {
+                    isChecked = false
                 }
+                
+                let chatList = ChatList(
+                    chatroomId: chatRoom.id,
+                    PlansId: plans.id,
+                    profileImage: plans.imageURLString,
+                    title: plans.title,
+                    location: plans.location,
+                    date: plans.date,
+                    updateAt: chat?.createdAt ?? chatRoom.updatedAt,
+                    isChecked: isChecked
+                )
+                
+                mappedResults.append(chatList)
             }
         }
-        return chatLists
+        
+        mappedResults.sort { $0.updateAt > $1.updateAt }
+        
+        return mappedResults
     }
 }

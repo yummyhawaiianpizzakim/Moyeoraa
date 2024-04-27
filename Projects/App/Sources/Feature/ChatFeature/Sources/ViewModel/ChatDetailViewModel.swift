@@ -49,7 +49,7 @@ public final class ChatDetailViewModel: BaseViewModel {
     
     public func trnasform(input: Input) -> Output {
         let chats = self.observeChatUseCase
-            .observe(chatRoomID: "1234")
+            .observe(chatRoomID: self.chatRoomID)
             .do(onNext: { [weak self] chats in
                 self?.chats = chats
                 print("self?.chats::\(self?.chats)")

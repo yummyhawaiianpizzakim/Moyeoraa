@@ -9,14 +9,12 @@
 import Foundation
 
 public struct Address {
-    public let id: String
     public let name: String
     public let address: String
     public let lat: Double
     public let lng: Double
     
-    public init(id: String, name: String, address: String, lat: Double, lng: Double) {
-        self.id = id
+    public init(name: String, address: String, lat: Double, lng: Double) {
         self.name = name
         self.address = address
         self.lat = lat
@@ -25,7 +23,4 @@ public struct Address {
 }
 
 extension Address: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(self.id)
-    }
 }

@@ -170,7 +170,7 @@ private extension ModifyPlansViewModel {
     func makeAddress(plans: Plans) -> Address {
         
         
-        return Address(id: plans.id, name: plans.location, address: plans.location, lat: plans.latitude, lng: plans.longitude)
+        return Address(name: plans.location, address: plans.location, lat: plans.latitude, lng: plans.longitude)
     }
 }
 

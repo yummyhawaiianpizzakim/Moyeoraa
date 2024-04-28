@@ -64,6 +64,6 @@ extension AppDelegate : MessagingDelegate {
             return
         }
         self.tokenManager.save(token: fcmToken, with: .fcmToken)
-        print(fcmToken)
+//        print(fcmToken)
     }
 }

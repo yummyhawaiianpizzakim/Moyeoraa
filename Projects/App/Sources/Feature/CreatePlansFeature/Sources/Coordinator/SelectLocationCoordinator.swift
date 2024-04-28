@@ -31,7 +31,12 @@ public final class SelectLocationCoordinator: CoordinatorProtocol {
     }
     
     private func showSelectLocationFeature() {
-        let searchLocationUseCase = SearchLocationUseCaseSpy()
+//        let searchLocationUseCase = SearchLocationUseCaseSpy()
+        let locationManager = LocationManagerImpl()
+        
+        let mapRepository = MapRepositoryImpl(locationManager: locationManager)
+        
+        let searchLocationUseCase = SearchLocationUseCaseImpl(mapRepository: mapRepository)
         
         let vm = SelectLocationViewModel(searchLocationUseCase: searchLocationUseCase)
         

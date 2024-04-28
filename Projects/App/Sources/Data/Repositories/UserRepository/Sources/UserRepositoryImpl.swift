@@ -41,4 +41,39 @@ public final class UserRepositoryImpl: UserRepositoryProtocol {
             .map { $0.compactMap { $0.toObject(UserDTO.self)?.toEntity() } }
             .asObservable()
     }
+    
+    public func getUsersInfo(_ keyword: String) -> Observable<[User]> {
+        let myID = self.tokenManager.getToken(with: .userId)
+        print("keyword:: \(keyword)")
+        let usersByName = self.searchUsers(byName: keyword)
+        let usersByTag = self.searchUsers(byTagNumber: keyword)
+        
+        return Observable.combineLatest(usersByName, usersByTag)
+            .map({ val -> [User] in
+                let (usersByName, usersByTag) = val
+                var arr: [User] = []
+                arr.append(contentsOf: usersByTag)
+                arr.append(contentsOf: usersByName)
+                return arr
+            })
+            .map { $0.filter { $0.id != myID } }
+            .map { $0.removingDuplicates() }
+            .debug("getUsersInfo(_ keyword")
+    }
+}
+
+private extension UserRepositoryImpl {
+    func searchUsers(byName name: String) -> Observable<[User]> {
+        self.firebaseService.getDocument(collection: .users, field: "name", keyword: name)
+            .debug("searchUsersByName")
+            .map({ $0.compactMap { $0.toObject(UserDTO.self)?.toEntity() } })
+            .asObservable()
+    }
+    
+    func searchUsers(byTagNumber tagNumber: String) -> Observable<[User]> {
+        self.firebaseService.getDocument(collection: .users, field: "tagNumber", keyword: tagNumber)
+            .debug("searchUsersByTagNumber")
+            .map({ $0.compactMap { $0.toObject(UserDTO.self)?.toEntity() } })
+            .asObservable()
+    }
 }

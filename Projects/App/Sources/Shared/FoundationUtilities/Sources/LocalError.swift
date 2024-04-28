@@ -14,4 +14,5 @@ enum LocalError: Error {
     case addressError
     case locationAuthError
     case tokenError
+    case transformType
 }

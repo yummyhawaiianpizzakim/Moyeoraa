@@ -11,13 +11,13 @@ import Foundation
 public struct UserDTO: Codable {
     public let id: String
     public let name: String
-    public let tagNumber: Int
+    public let tagNumber: String
     public let profileImage: String?
     public let fcmToken: String
     
     public init(id: String,
                 name: String,
-                tagNumber: Int,
+                tagNumber: String,
                 profileImage: String? = nil,
                 fcmToken: String) {
         self.id = id
@@ -28,10 +28,12 @@ public struct UserDTO: Codable {
     }
     
     public func toEntity() -> User {
+        let tagNumber = Int(self.tagNumber)
+        
         return .init(
             id: self.id,
             name: self.name,
-            tagNumber: self.tagNumber,
+            tagNumber: tagNumber ?? 1000,
             profileImage: self.profileImage,
             fcmToken: self.fcmToken,
             isNotification: false

@@ -33,7 +33,7 @@ public final class AuthRepositoryImpl: AuthRepositoryProtocol {
         guard let userID = self.tokenManager.getToken(with: .userId),
               let fcmToken = self.tokenManager.getToken(with: .fcmToken)
         else { return .error(RxError.unknown) }
-        
+        let tagNumber = String(tagNumber)
         let userDTO = UserDTO(
             id: userID,
             name: name,

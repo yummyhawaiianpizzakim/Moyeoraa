@@ -30,17 +30,6 @@ public struct User: Hashable {
         self.isNotification = isNotification
     }
     
-    public func dtoToEntity(dto: UserDTO) -> Self {
-        return .init(
-            id: dto.id,
-            name: dto.name,
-            tagNumber: dto.tagNumber,
-            profileImage: dto.profileImage,
-            fcmToken: dto.fcmToken,
-            isNotification: false
-        )
-    }
-    
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.id)
     }

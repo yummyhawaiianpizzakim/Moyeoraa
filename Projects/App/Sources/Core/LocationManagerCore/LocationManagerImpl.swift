@@ -18,7 +18,7 @@ public final class LocationManagerImpl: NSObject, LocationManagerProtocol {
     private var searchCompleter = MKLocalSearchCompleter()
     private let locationManager = CLLocationManager()
     
-    public var results = BehaviorRelay<[Address]>(value: [])
+    private var results = BehaviorRelay<[Address]>(value: [])
     var curCoordinate = PublishRelay<Coordinate>()
     
     // MARK: Initializers

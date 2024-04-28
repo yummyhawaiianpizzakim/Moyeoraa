@@ -12,9 +12,6 @@ import RxRelay
 import RxSwift
 
 public protocol LocationManagerProtocol: AnyObject {
-    // MARK: Properties
-    var results: BehaviorRelay<[Address]> { get }
-    
     // MARK: Methods
     func setSearchText(with searchText: String) -> Observable<[Address]> 
     func fetchCurrentLocation() -> Result<Coordinate, Error>

@@ -33,6 +33,12 @@ public final class HomeFeature: BaseFeature {
     
     private var dataSource: UICollectionViewDiffableDataSource<Int, Plans>?
     
+    private lazy var scrollView = UIScrollView()
+    
+    private lazy var containerView = UIView()
+    
+    private lazy var contentView = UIView()
+    
     private lazy var calendarView: MYRCalendarView = {
         let view = MYRCalendarView(feature: .home)
         return view
@@ -45,6 +51,7 @@ public final class HomeFeature: BaseFeature {
     
     private lazy var plansCollectionView: UICollectionView = {
         let colView = UICollectionView(frame: .zero, collectionViewLayout: self.createLayout())
+        colView.isScrollEnabled = false
         colView.register(MYRPlansCVC.self)
         return colView
     }()
@@ -59,21 +66,56 @@ public final class HomeFeature: BaseFeature {
         super.init()
     }
     
+    public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.updateScrollViewContentSize()
+    }
+    
     public override func configureAttributes() {
         let view = MYRNavigationView(title: "약속 일정")
         self.setNavigationBar(isBackButton: true, titleView: view, rightButtonItem: nil)
+        self.dataSource = self.generateDataSource()
     }
-    
+   
     public override func configureUI() {
+        self.view.addSubview(self.scrollView)
+        self.view.addSubview(self.createPlansButton)
+        self.scrollView.addSubview(self.containerView)
+        
         [self.calendarView,
-         self.listLabel,
-         self.plansCollectionView,
-         self.createPlansButton].forEach {
-            self.view.addSubview($0)
+         self.listLabel].forEach {
+            self.contentView.addSubview($0)
+        }
+        
+        [self.contentView,
+         self.plansCollectionView
+         ].forEach {
+            self.containerView.addSubview($0)
+        }
+        
+        self.scrollView.snp.makeConstraints { make in
+            make.top.equalTo(self.view.safeAreaLayoutGuide)
+            make.horizontalEdges.equalToSuperview()
+            make.width.equalToSuperview()
+            make.bottom.equalToSuperview()
+        }
+        
+        self.contentView.snp.makeConstraints { make in
+            make.top.equalToSuperview()
+            make.horizontalEdges.equalToSuperview()
+            make.width.equalToSuperview()
+            make.height.greaterThanOrEqualTo(432 + 8 + 20 + 24)
+        }
+        
+        self.containerView.snp.makeConstraints { make in
+            make.top.bottom.width.equalToSuperview()
+            make.horizontalEdges.equalToSuperview()
+            make.width.equalToSuperview()
+            make.height.greaterThanOrEqualTo(545)
         }
         
         self.calendarView.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(Metric.calendarTopMargin)
+            make.top.equalToSuperview().offset(Metric.calendarTopMargin)
             make.leading.equalToSuperview().offset(Metric.calendarLeadingMargin)
             make.trailing.equalToSuperview().offset(Metric.calendarTrailingMargin)
             make.height.equalTo(Metric.calendarViewHeight)
@@ -86,9 +128,10 @@ public final class HomeFeature: BaseFeature {
         }
         
         self.plansCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(self.listLabel.snp.bottom).offset(Metric.collViewTopPadding)
+            make.top.equalTo(self.contentView.snp.bottom).offset(Metric.collViewTopPadding)
             make.leading.equalTo(self.calendarView.snp.leading)
             make.trailing.equalTo(self.calendarView.snp.trailing)
+            make.height.greaterThanOrEqualTo(300)
             make.bottom.equalToSuperview()
         }
         
@@ -100,7 +143,6 @@ public final class HomeFeature: BaseFeature {
     }
     
     public override func bindViewModel() {
-        
         let selectedItem = self.plansCollectionView.rx.itemSelected.withUnretained(self).compactMap { owner, indexPath in
             return owner.dataSource?.itemIdentifier(for: indexPath)
         }.asObservable()
@@ -113,17 +155,29 @@ public final class HomeFeature: BaseFeature {
         )
         let output = self.viewModel.trnasform(input: input)
         
-        
         output.Plans.drive(with: self) { owner, plansArr in
-            owner.dataSource = owner.generateDataSource()
             let snap = owner.setSnapshot(plans: plansArr)
             owner.dataSource?.apply(snap)
+            owner.plansCollectionView.reloadData()
+            owner.updateScrollViewContentSize()
         }
         .disposed(by: self.disposeBag)
     }
 }
 
 private extension HomeFeature {
+    func updateScrollViewContentSize() {
+        let collectionViewHeight = self.plansCollectionView.contentSize.height
+        let contentViewHeight = self.contentView.frame.height
+        // 24는 label과 plansCollectionView 패딩, 8은 calendarView 위 여백
+        let totalHeight = collectionViewHeight + contentViewHeight
+        + 24 + 8
+        
+        scrollView.contentSize = CGSize(width: scrollView.frame.width, height: totalHeight)
+        containerView.frame = CGRect(x: 0, y: 0, width: scrollView.frame.width, height: totalHeight)
+        
+    }
+    
     func generateDataSource() -> UICollectionViewDiffableDataSource<Int, Plans> {
         let dataSource = UICollectionViewDiffableDataSource<Int, Plans>(collectionView: self.plansCollectionView, cellProvider: { collectionView, indexPath, item in
             guard let cell = collectionView.dequeueCell(MYRPlansCVC.self, for: indexPath)
@@ -145,12 +199,12 @@ private extension HomeFeature {
     
     func createLayout() -> UICollectionViewCompositionalLayout {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                              heightDimension: .fractionalHeight(1.0))
+                                              heightDimension: .estimated(CGFloat(Metric.cellHeight)))
         
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
         let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                               heightDimension: .absolute(CGFloat(Metric.cellHeight)))
+                                               heightDimension: .estimated(CGFloat(Metric.cellHeight)))
         
         let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize,
                                                      subitems: [item])

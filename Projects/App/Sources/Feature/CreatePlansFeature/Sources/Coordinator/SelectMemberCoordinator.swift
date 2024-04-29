@@ -40,12 +40,18 @@ public final class SelectMemberCoordinator: CoordinatorProtocol {
         let tokenManager = KeychainTokenManager.shared
         
         let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let friendRepository = FriendRepositoryImpl(fireBaseService: firebaseService, tokenManager: tokenManager)
         
-        let fetchFriendsUseCase = FetchFriendsUseCaseSpy()
-//        let searchUserUseCase = SearchUserUseCaseSpy()
+        let fetchFriendsUseCase = FetchFriendsUseCaseImpl(friendRepository: friendRepository)
         let searchUserUseCase = SearchUserUseCaseImpl(userRepository: userRepository)
-        let createFriendUseCase = CreateFriendUseCaseSpy()
-        let deleteFriendUseCase = DeleteFriendUseCaseSpy()
+        let createFriendUseCase = CreateFriendUseCaseImpl(friendRepository: friendRepository, userRepository: userRepository)
+        let deleteFriendUseCase = DeleteFriendUseCaseImpl(userRepository: userRepository, friendRepository: friendRepository)
+        
+//        let fetchFriendsUseCase = FetchFriendsUseCaseSpy()
+//        let searchUserUseCase = SearchUserUseCaseSpy()
+        
+//        let createFriendUseCase = CreateFriendUseCaseSpy()
+//        let deleteFriendUseCase = DeleteFriendUseCaseSpy()
         
         let vm = SelectMemberViewModel(
             fetchFriendsUseCase: fetchFriendsUseCase,

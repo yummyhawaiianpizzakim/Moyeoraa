@@ -18,8 +18,10 @@ public protocol FireBaseServiceProtocol {
     func getDocument(collection: FireStoreCollection, field: String, condition: [String]) -> Single<[FirebaseData]>
     func getDocument(collection: FireStoreCollection, field: String, arrayContainsAny: [String]) -> Single<[FirebaseData]> 
     func getDocument(collection: FireStoreCollection, field: String, in values: [Any]) -> Single<[FirebaseData]>
+    func getDocument(collectionPaths: [String], field: String, in values: [Any]) -> Single<[FirebaseData]> 
     func getDocument(documents: [String]) -> Single<FirebaseData>
-    func getDocument(collection: FireStoreCollection, field: String, keyword value: Any) -> Single<[FirebaseData]> 
+    func getDocument(collection: FireStoreCollection, documents: [String]) -> Single<[FirebaseData]> 
+    func getDocument(collection: FireStoreCollection, field: String, keyword value: Any) -> Single<[FirebaseData]>
     
     func createDocument(collection: FireStoreCollection, document: String, values: FirebaseData) -> Single<Void>
     func createDocument(documents: [String], values: FirebaseData) -> Single<Void>
@@ -27,6 +29,7 @@ public protocol FireBaseServiceProtocol {
     func updateDocument(collection: FireStoreCollection, document: String, values: FirebaseData) -> Single<Void>
     
     func deleteDocument(collection: FireStoreCollection, document: String) -> Single<Void>
+    func deleteDocument(collectionPaths: [String], document: String) -> Single<Void> 
     
     func observer(collection: FireStoreCollection, document: String) -> Observable<FirebaseData>
     func observer(documents: [String]) -> Observable<FirebaseData>

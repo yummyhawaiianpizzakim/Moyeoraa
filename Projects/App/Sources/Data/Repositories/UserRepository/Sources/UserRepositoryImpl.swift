@@ -58,21 +58,21 @@ public final class UserRepositoryImpl: UserRepositoryProtocol {
             })
             .map { $0.filter { $0.id != myID } }
             .map { $0.removingDuplicates() }
-            .debug("getUsersInfo(_ keyword")
+//            .debug("getUsersInfo(_ keyword")
     }
 }
 
 private extension UserRepositoryImpl {
     func searchUsers(byName name: String) -> Observable<[User]> {
         self.firebaseService.getDocument(collection: .users, field: "name", keyword: name)
-            .debug("searchUsersByName")
+//            .debug("searchUsersByName")
             .map({ $0.compactMap { $0.toObject(UserDTO.self)?.toEntity() } })
             .asObservable()
     }
     
     func searchUsers(byTagNumber tagNumber: String) -> Observable<[User]> {
         self.firebaseService.getDocument(collection: .users, field: "tagNumber", keyword: tagNumber)
-            .debug("searchUsersByTagNumber")
+//            .debug("searchUsersByTagNumber")
             .map({ $0.compactMap { $0.toObject(UserDTO.self)?.toEntity() } })
             .asObservable()
     }

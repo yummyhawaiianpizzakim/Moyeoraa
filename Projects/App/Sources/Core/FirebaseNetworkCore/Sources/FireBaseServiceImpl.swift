@@ -109,6 +109,29 @@ public final class FireBaseServiceImpl: FireBaseServiceProtocol {
         }
     }
     
+    public func getDocument(collectionPaths: [String], field: String, in values: [Any]) -> Single<[FirebaseData]> {
+        return Single.create { [weak self] single in
+            guard let self else { return Disposables.create() }
+            
+            var queries = values
+            if queries.isEmpty { queries.append("") }
+            
+            self.database.collection(collectionPaths.joined(separator: "/"))
+                .whereField(field, in: queries)
+                .getDocuments { snapshot, error in
+                    if let error = error { single(.failure(error)) }
+                    
+                    guard let snapshot = snapshot else {
+                        single(.failure(FireStoreError.unknown))
+                        return
+                    }
+                    let data = snapshot.documents.map { $0.data() }
+                    single(.success(data))
+                }
+            return Disposables.create()
+        }
+    }
+    
     public func getDocument(collection: FireStoreCollection) -> Single<[FirebaseData]> {
         return Single.create { [weak self] single in
             guard let self else { return Disposables.create() }
@@ -142,6 +165,26 @@ public final class FireBaseServiceImpl: FireBaseServiceProtocol {
                     
                     single(.success(data))
                 }
+            return Disposables.create()
+        }
+    }
+    
+    public func getDocument(collection: FireStoreCollection, documents: [String]) -> Single<[FirebaseData]> {
+        return Single.create { single in
+            let documents = [collection.name] + documents
+            self.database
+                .collection(documents.joined(separator: "/"))
+                .getDocuments { snapshot, error in
+                    if let error { single(.failure(error)) }
+                    
+                    guard let snapshot else {
+                        single(.failure(FireStoreError.unknown))
+                        return
+                    }
+                    let data = snapshot.documents.map { $0.data() }
+                    single(.success(data))
+                }
+            
             return Disposables.create()
         }
     }
@@ -244,6 +287,21 @@ public final class FireBaseServiceImpl: FireBaseServiceProtocol {
             return Disposables.create()
         }
     }
+    
+    public func deleteDocument(collectionPaths: [String], document: String) -> Single<Void> {
+        return Single.create { [weak self] single in
+            guard let self else { return Disposables.create() }
+            
+            self.database.collection(collectionPaths.joined(separator: "/"))
+                .document(document)
+                .delete { error in
+                    if let error = error { single(.failure(error)) }
+                    single(.success(()))
+                }
+            return Disposables.create()
+        }
+    }
+    
 }
 
 // MARK: - Observe

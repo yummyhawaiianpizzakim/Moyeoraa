@@ -204,6 +204,7 @@ public final class SelectMemberFeature: BaseFeature {
             let snapshot = owner.setUsersSnapshot(users: users)
             owner.usersSnapshot = snapshot
             owner.usersDataSource?.apply(snapshot)
+            owner.usersTableView.reloadData()
         }
         .disposed(by: self.disposeBag)
 
@@ -279,7 +280,9 @@ extension SelectMemberFeature: UITableViewDelegate {
                   let searchUserCell = tableView.dequeueCell(SelectMemberSearchUsersTVC.self, for: indexPath)
             else { return UITableViewCell() }
             searchUserCell.bindCell(profileURL: item.profileImage ?? "", userName: item.name, userTag: item.tagNumber)
-
+            let isFriend = self.checkFriend(indexPath: indexPath)
+            searchUserCell.isPlusButtonSelected = isFriend
+            
             searchUserCell.plusButton.rx.tap
                 .throttle(.seconds(1), scheduler: MainScheduler.instance)
                 .compactMap { _ in
@@ -299,6 +302,23 @@ extension SelectMemberFeature: UITableViewDelegate {
 
             return searchUserCell
         }
+    }
+    
+    private func checkFriend(indexPath: IndexPath) -> Bool {
+        guard let friends = self.friendsSnapshot?.itemIdentifiers,
+              let user = self.usersDataSource?.itemIdentifier(for: indexPath)
+        else {
+            return false
+        }
+        let friendsDict = Dictionary(uniqueKeysWithValues: friends.map { ($0.userID, $0) } )
+        
+        for (id, _) in friendsDict {
+            if user.id == id {
+                return true
+            }
+        }
+        
+        return false
     }
 
     private func setFriendsSnapshot(friends: [Friend]) -> NSDiffableDataSourceSnapshot<Int, Friend> {

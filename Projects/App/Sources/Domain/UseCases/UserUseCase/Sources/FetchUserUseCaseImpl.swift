@@ -17,8 +17,7 @@ public final class FetchUserUseCaseImpl: FetchUserUseCaseProtocol {
     }
     
     public func fetch() -> Observable<User> {
-        let user = User(id: "1234", name: "dkemrmf", tagNumber: 1234, fcmToken: "zxcv", isNotification: true)
-        return Observable.just(user)
+        self.userRepository.getUserInfo()
     }
     
     public func fetch(userIDs: [String]) -> Observable<[User]> {

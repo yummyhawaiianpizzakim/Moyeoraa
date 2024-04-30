@@ -19,7 +19,6 @@ public final class EditProfileViewModel: BaseViewModel {
     public typealias Action = EditProfileViewModelActions
     public var actions: Action?
     public var defaultName: String?
-//    private let profileImage = PublishSubject<Data?>()
     
     private let fetchUserUseCase: FetchUserUseCaseProtocol
     private let updateUserUseCase: UpdateUserUseCaseProtocol
@@ -34,6 +33,7 @@ public final class EditProfileViewModel: BaseViewModel {
     }
     
     public struct Input {
+        let viewDidAppear: Observable<Void>
         let name: Observable<String>
         let profileImage: Observable<Data?>
         let doneButtonDidTap: Observable<Void>
@@ -46,7 +46,11 @@ public final class EditProfileViewModel: BaseViewModel {
     }
     
     public func trnasform(input: Input) -> Output {
-        let user = self.fetchUserUseCase.fetch().share()
+        let user = input.viewDidAppear
+            .flatMap { _ in
+                self.fetchUserUseCase.fetch()
+            }
+            .share()
         
         user.map { $0.name }
             .bind(with: self, onNext: { owner, name in
@@ -60,12 +64,15 @@ public final class EditProfileViewModel: BaseViewModel {
             .withLatestFrom(editedProfile)
             .withUnretained(self)
             .flatMapFirst { owner, val -> Observable<Void> in
-                let (name, imageData) = val
+                guard let defaultName = owner.defaultName else { return .error(RxError.unknown) }
+                var (name, imageData) = val
+                
+                if name.isEmpty || name == owner.defaultName {
+                    name = defaultName
+                }
+                
                 return owner.updateUser(imageData: imageData, name: name)
             }
-//            .flatMap({ _ in
-//                Observable<Void>.error(RxCocoaError.unknown)
-//            })
             .share()
         
         let buttonEnabled = editedProfile

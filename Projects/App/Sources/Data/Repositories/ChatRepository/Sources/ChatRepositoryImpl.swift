@@ -96,6 +96,11 @@ public final class ChatRepositoryImpl: ChatRepositoryProtocol {
             .updateDocument(collection: .chatrooms, document: "\(chatroomId)/chats/\(chatId)", values: values)
             .asObservable()
     }
+    
+    public func deleteChatRoom(chatroomId: String) -> Observable<Void> {
+        self.firebaseService.deleteDocument(collection: .chatrooms, document: chatroomId)
+            .asObservable()
+    }
 }
 
 private extension ChatRepositoryImpl {

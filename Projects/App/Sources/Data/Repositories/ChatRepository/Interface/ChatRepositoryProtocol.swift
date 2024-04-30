@@ -15,4 +15,5 @@ public protocol ChatRepositoryProtocol: AnyObject {
     func observeChat(chatRoomID: String) -> Observable<[Chat]>
     func send(content: String, at chatRoomId: String) -> Observable<Void>
     func updateIsChecked(chatroomId: String, chatId: String, toState state: Bool) -> Observable<Void>
+    func deleteChatRoom(chatroomId: String) -> Observable<Void> 
 }

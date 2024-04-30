@@ -9,5 +9,5 @@
 import RxSwift
 
 public protocol DeletePlansUseCaseProtocol: AnyObject {
-    func delete(plansID: String, chatRoomID: String) -> Observable<Void>
+    func delete(plansID: String) -> Observable<Void> 
 }

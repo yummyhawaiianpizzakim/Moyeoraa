@@ -13,7 +13,7 @@ public final class DeletePlansUseCaseSpy: DeletePlansUseCaseProtocol {
         
     }
     
-    public func delete(plansID: String, chatRoomID: String) -> Observable<Void> {
+    public func delete(plansID: String) -> Observable<Void> {
         
 //        return Observable.just(())
         return Observable.error(RxError.unknown)

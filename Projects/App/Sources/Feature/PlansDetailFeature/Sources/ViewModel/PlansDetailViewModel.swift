@@ -25,16 +25,18 @@ public final class PlansDetailViewModel: BaseViewModel {
     private let fetchPlansUseCase: FetchPlansUseCaseProtocol
     private let fetchUserUseCase: FetchUserUseCaseProtocol
     private let deletePlansUseCase: DeletePlansUseCaseProtocol
-    
+    private let deleteChatRoomUseCase: DeleteChatRoomUseCaseProtocol
     
     public init(plansID: String,
                 fetchPlansUseCase: FetchPlansUseCaseProtocol,
                 fetchUserUseCase: FetchUserUseCaseProtocol,
-                deletePlansUseCase: DeletePlansUseCaseProtocol) {
+                deletePlansUseCase: DeletePlansUseCaseProtocol,
+                deleteChatRoomUseCase: DeleteChatRoomUseCaseProtocol) {
         self.plansID = plansID
         self.fetchPlansUseCase = fetchPlansUseCase
         self.fetchUserUseCase = fetchUserUseCase
         self.deletePlansUseCase = deletePlansUseCase
+        self.deleteChatRoomUseCase = deleteChatRoomUseCase
     }
     
     public struct Input {
@@ -65,7 +67,7 @@ public final class PlansDetailViewModel: BaseViewModel {
         input.enterChatButton
             .withLatestFrom(plans)
             .subscribe(with: self) { owner, plans in
-                owner.actions?.showChatRoomFeature(plans.id, plans.title)
+                owner.actions?.showChatRoomFeature(plans.chatRoomID, plans.title)
             }
             .disposed(by: self.disposeBag)
         
@@ -73,7 +75,10 @@ public final class PlansDetailViewModel: BaseViewModel {
             .withLatestFrom(plans)
             .withUnretained(self)
             .flatMap { owner, plans in
-                owner.deletePlansUseCase.delete(plansID: plans.id, chatRoomID: plans.chatRoomID)
+                owner.deletePlansUseCase.delete(plansID: plans.id)
+                    .flatMap { _ in
+                        owner.deleteChatRoomUseCase.delete(chatRoomID: plans.chatRoomID)
+                    }
             }
         
         let dataSource = plans

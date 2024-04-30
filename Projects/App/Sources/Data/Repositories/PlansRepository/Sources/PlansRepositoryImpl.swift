@@ -76,4 +76,15 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
             .map { $0.compactMap { $0.toObject(PlansDTO.self)?.toEntity() } }
             .asObservable()
     }
+    
+    public func fetchPlans(id: String) -> Observable<Plans> {
+        self.firebaseService.getDocument(collection: .plans, document: id)
+            .compactMap({ $0.toObject(PlansDTO.self)?.toEntity() })
+            .asObservable()
+    }
+    
+    public func deletePlans(id: String) -> Observable<Void> {
+        self.firebaseService.deleteDocument(collection: .plans, document: id)
+            .asObservable()
+    }
 }

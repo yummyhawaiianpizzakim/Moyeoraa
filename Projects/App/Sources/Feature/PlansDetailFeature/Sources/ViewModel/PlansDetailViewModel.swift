@@ -25,16 +25,18 @@ public final class PlansDetailViewModel: BaseViewModel {
     private let fetchPlansUseCase: FetchPlansUseCaseProtocol
     private let fetchUserUseCase: FetchUserUseCaseProtocol
     private let deletePlansUseCase: DeletePlansUseCaseProtocol
-    
+    private let deleteChatRoomUseCase: DeleteChatRoomUseCaseProtocol
     
     public init(plansID: String,
                 fetchPlansUseCase: FetchPlansUseCaseProtocol,
                 fetchUserUseCase: FetchUserUseCaseProtocol,
-                deletePlansUseCase: DeletePlansUseCaseProtocol) {
+                deletePlansUseCase: DeletePlansUseCaseProtocol,
+                deleteChatRoomUseCase: DeleteChatRoomUseCaseProtocol) {
         self.plansID = plansID
         self.fetchPlansUseCase = fetchPlansUseCase
         self.fetchUserUseCase = fetchUserUseCase
         self.deletePlansUseCase = deletePlansUseCase
+        self.deleteChatRoomUseCase = deleteChatRoomUseCase
     }
     
     public struct Input {
@@ -48,6 +50,7 @@ public final class PlansDetailViewModel: BaseViewModel {
         let date: Driver<Date>
         let memberCount: Driver<Int>
         let dataSource: Driver<[User]>
+        let coordinate: Driver<Coordinate>
         let result: Observable<Void>
     }
     
@@ -62,10 +65,13 @@ public final class PlansDetailViewModel: BaseViewModel {
         
         let memberCount = plans.map({ $0.usersID.count }).asDriver(onErrorJustReturn: 0)
         
+        let coordinate = plans.map { Coordinate(lat: $0.latitude, lng: $0.longitude) }
+            .asDriver(onErrorJustReturn: Coordinate(lat: 37.553836, lng: 126.969652))
+        
         input.enterChatButton
             .withLatestFrom(plans)
             .subscribe(with: self) { owner, plans in
-                owner.actions?.showChatRoomFeature(plans.id, plans.title)
+                owner.actions?.showChatRoomFeature(plans.chatRoomID, plans.title)
             }
             .disposed(by: self.disposeBag)
         
@@ -73,7 +79,10 @@ public final class PlansDetailViewModel: BaseViewModel {
             .withLatestFrom(plans)
             .withUnretained(self)
             .flatMap { owner, plans in
-                owner.deletePlansUseCase.delete(plansID: plans.id, chatRoomID: plans.chatRoomID)
+                owner.deletePlansUseCase.delete(plansID: plans.id)
+                    .flatMap { _ in
+                        owner.deleteChatRoomUseCase.delete(chatRoomID: plans.chatRoomID)
+                    }
             }
         
         let dataSource = plans
@@ -87,7 +96,8 @@ public final class PlansDetailViewModel: BaseViewModel {
             address: address,
             date: date,
             memberCount: memberCount,
-            dataSource: dataSource.asDriver(onErrorJustReturn: []),
+            dataSource: dataSource.asDriver(onErrorJustReturn: []), 
+            coordinate: coordinate,
             result: result
         )
     }

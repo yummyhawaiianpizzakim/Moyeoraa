@@ -50,6 +50,7 @@ public final class PlansDetailViewModel: BaseViewModel {
         let date: Driver<Date>
         let memberCount: Driver<Int>
         let dataSource: Driver<[User]>
+        let coordinate: Driver<Coordinate>
         let result: Observable<Void>
     }
     
@@ -63,6 +64,9 @@ public final class PlansDetailViewModel: BaseViewModel {
         let date = plans.map({ $0.date }).asDriver(onErrorJustReturn: Date())
         
         let memberCount = plans.map({ $0.usersID.count }).asDriver(onErrorJustReturn: 0)
+        
+        let coordinate = plans.map { Coordinate(lat: $0.latitude, lng: $0.longitude) }
+            .asDriver(onErrorJustReturn: Coordinate(lat: 37.553836, lng: 126.969652))
         
         input.enterChatButton
             .withLatestFrom(plans)
@@ -92,7 +96,8 @@ public final class PlansDetailViewModel: BaseViewModel {
             address: address,
             date: date,
             memberCount: memberCount,
-            dataSource: dataSource.asDriver(onErrorJustReturn: []),
+            dataSource: dataSource.asDriver(onErrorJustReturn: []), 
+            coordinate: coordinate,
             result: result
         )
     }

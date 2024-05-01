@@ -7,10 +7,18 @@
 //
 
 import UIKit
+import RxSwift
+import RxRelay
 
 public final class FriendsTVC: MYRSearchUserTVC {
+    public var disposeBag = DisposeBag()
+    
+    public var blockFriendTrigger = PublishRelay<Void>()
+    
     public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        let interaction = UIContextMenuInteraction(delegate: self)
+        self.contentView.addInteraction(interaction)
     }
     
     required init?(coder: NSCoder) {
@@ -22,5 +30,28 @@ public final class FriendsTVC: MYRSearchUserTVC {
         self.profileView.image = nil
         self.userNameLabel.setText(with: "")
         self.userTagLabel.setText(with: "")
+        self.disposeBag = DisposeBag()
+    }
+}
+
+
+extension FriendsTVC: UIContextMenuInteractionDelegate {
+    public func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        
+        return .init(identifier: nil, previewProvider: nil) { [weak self] menus in
+            guard let self else { return UIMenu() }
+            return UIMenu(children: self.createMenuItems())
+        }
+    }
+    
+    func createMenuItems() -> [UIAction] {
+        return [
+            UIAction(
+                title: "차단하기",
+                handler: { [weak self] _ in
+                    self?.blockFriendTrigger.accept(())
+                }
+            )
+        ]
     }
 }

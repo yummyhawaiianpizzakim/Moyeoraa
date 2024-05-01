@@ -62,6 +62,13 @@ public final class FriendRepositoryImpl: FriendRepositoryProtocol {
                     .debug("deleteFriend")
             }
     }
+    
+    public func deleteFriend(friendID: String) -> Observable<Void> {
+        guard let myID = self.tokenManager.getToken(with: .userId)
+        else { return .error(TokenManagerError.notFound) }
+        return self.fireBaseService.deleteDocument(collectionPaths: ["users", myID, "friends"], document: friendID)
+            .asObservable()
+    }
 }
 
 private extension FriendRepositoryImpl {

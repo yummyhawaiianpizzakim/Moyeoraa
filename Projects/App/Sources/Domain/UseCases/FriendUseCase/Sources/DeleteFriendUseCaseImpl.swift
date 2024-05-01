@@ -25,5 +25,8 @@ public final class DeleteFriendUseCaseImpl: DeleteFriendUseCaseProtocol {
             }
     }
     
+    public func delete(friendID: String) -> Observable<Void> {
+        self.friendRepository.deleteFriend(friendID: friendID)
+    }
     
 }

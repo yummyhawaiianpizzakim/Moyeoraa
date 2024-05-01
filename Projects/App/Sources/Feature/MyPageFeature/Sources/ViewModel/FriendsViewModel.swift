@@ -16,16 +16,23 @@ public final class FriendsViewModel: BaseViewModel {
     public typealias Action = FriendsViewModelActions
     public var actions: Action?
     
+    public let blockedUsers = BehaviorRelay<[Block.BlockedUser]>(value: [])
+    
     public let fetchFriendsUseCase: FetchFriendsUseCaseProtocol
     public let searchUserUseCase: SearchUserUseCaseProtocol
     public let createFriendUseCase: CreateFriendUseCaseProtocol
     public let deleteFriendUseCase: DeleteFriendUseCaseProtocol
+    public let createBlockUseCase: CreateBlockUseCaseProtocol
+    public let fetchBlockedUserUseCase: FetchBlockedUserUseCaseProtocol
     
-    public init(fetchFriendsUseCase: FetchFriendsUseCaseProtocol, searchUserUseCase: SearchUserUseCaseProtocol, createFriendUseCase: CreateFriendUseCaseProtocol, deleteFriendUseCase: DeleteFriendUseCaseProtocol) {
+    public init(fetchFriendsUseCase: FetchFriendsUseCaseProtocol, searchUserUseCase: SearchUserUseCaseProtocol, createFriendUseCase: CreateFriendUseCaseProtocol, deleteFriendUseCase: DeleteFriendUseCaseProtocol, createBlockUseCase: CreateBlockUseCaseProtocol,
+                fetchBlockedUserUseCase: FetchBlockedUserUseCaseProtocol) {
         self.fetchFriendsUseCase = fetchFriendsUseCase
         self.searchUserUseCase = searchUserUseCase
         self.createFriendUseCase = createFriendUseCase
         self.deleteFriendUseCase = deleteFriendUseCase
+        self.createBlockUseCase = createBlockUseCase
+        self.fetchBlockedUserUseCase = fetchBlockedUserUseCase
     }
     
     public struct Input {
@@ -44,7 +51,15 @@ public final class FriendsViewModel: BaseViewModel {
             .flatMap { owner, keyword in
                 owner.searchUserUseCase.search(text: keyword)
             }
+            .withUnretained(self)
+            .map { owner, users in
+                owner.filterBlockedUser(searchedUsers: users, blockedUsers: owner.blockedUsers.value)
+            }
             .share()
+        
+        self.fetchBlockedUserUseCase.fetch()
+            .bind(to: self.blockedUsers)
+            .disposed(by: self.disposeBag)
         
         return Output(
             friends: friends.asDriver(onErrorJustReturn: []),
@@ -74,6 +89,25 @@ public extension  FriendsViewModel {
         self.deleteFriendUseCase.delete(userID)
             .subscribe()
             .disposed(by: self.disposeBag)
+    }
+    
+    func blockFriend(friendID: String, userID: String) {
+        self.createBlockUseCase.create(friendID: friendID, userID: userID)
+            .withUnretained(self)
+            .flatMap({ owner, _ in
+                owner.deleteFriendUseCase.delete(friendID: friendID)
+            })
+            .subscribe()
+            .disposed(by: self.disposeBag)
+    }
+    
+    func filterBlockedUser(searchedUsers: [User], blockedUsers: [Block.BlockedUser]) -> [User] {
+        let blockedUserDict = Dictionary(uniqueKeysWithValues: blockedUsers.map({ ($0.blockedUser.id, $0) }))
+        
+        return searchedUsers.filter {
+            $0.id == blockedUserDict[$0.id]?.blockedUser.id ?
+            false : true
+        }
     }
 }
 

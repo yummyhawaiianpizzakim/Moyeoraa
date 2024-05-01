@@ -47,4 +47,29 @@ public final class BlockRepositoryImpl: BlockRepositoryProtocol {
             }
             .asObservable()
     }
+    
+    public func deleteBlockUser(userID: String) -> Observable<Void> {
+        guard let myID = self.tokenManager.getToken(with: .userId)
+        else { return .error(TokenManagerError.notFound) }
+        
+        return self.firebaseService.getDocument(collection: .blocks, field: "userId", in: [myID])
+            .asObservable()
+            .map { $0.compactMap { $0.toObject(BlockDTO.self)?.toEntity() } }
+            .filter {
+                !$0.filter { $0.blockedUserId == userID }.isEmpty
+            }
+            .compactMap({ blocks in
+                blocks.last?.blockId
+            })
+            .withUnretained(self)
+            .flatMap { owner, id in
+                owner.deleteBlock(blockID: id)
+            }
+    }
+}
+
+private extension BlockRepositoryImpl {
+    func deleteBlock(blockID: String) -> Observable<Void> {
+        return self.firebaseService.deleteDocument(collection: .blocks, document: blockID).asObservable()
+    }
 }

@@ -12,4 +12,5 @@ import RxSwift
 public protocol BlockRepositoryProtocol: AnyObject {
     func createBlockUser(userID: String) -> Observable<Void>
     func fetchBlocks() -> Observable<[Block]>
+    func deleteBlockUser(userID: String) -> Observable<Void> 
 }

@@ -20,7 +20,4 @@ public final class CreateBlockUseCaseImpl: CreateBlockUseCaseProtocol {
         self.blockRepository.createBlockUser(userID: userID)
     }
     
-    public func create() -> Observable<Void> {
-        
-    }
 }

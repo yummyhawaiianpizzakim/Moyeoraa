@@ -29,9 +29,19 @@ public final class BlockUserCoordinator: CoordinatorProtocol {
     }
     
     private func showBlockUserFeature() {
-        let fetchBlockedUserUseCase = FetchBlockedUserUseCaseSpy()
-        let deleteBlockUseCase = DeleteBlockUseCaseSpy()
-        let createBlockUseCase = CreateBlockUseCaseSpy()
+        let firebaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let blockRepository = BlockRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        
+        let fetchBlockedUserUseCase = FetchBlockedUserUseCaseImpl(blockRepository: blockRepository, userRepository: userRepository)
+        let deleteBlockUseCase = DeleteBlockUseCaseImpl(blockRepository: blockRepository)
+        let createBlockUseCase = CreateBlockUseCaseImpl(blockRepository: blockRepository)
+        
+//        let fetchBlockedUserUseCase = FetchBlockedUserUseCaseSpy()
+//        let deleteBlockUseCase = DeleteBlockUseCaseSpy()
+//        let createBlockUseCase = CreateBlockUseCaseSpy()
         let vm = BlockUserViewModel(
             fetchBlockedUserUseCase: fetchBlockedUserUseCase,
             deleteBlockUseCase: deleteBlockUseCase,

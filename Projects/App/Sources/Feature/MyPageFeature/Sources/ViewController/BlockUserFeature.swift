@@ -101,8 +101,8 @@ public final class BlockUserFeature: BaseFeature {
         
         output.dataSource
         .drive(with: self) { owner, users in
-            self.snapshot = owner.setSnapshot(dataSource: users)
-            guard let snapshot = self.snapshot else { return }
+            owner.snapshot = owner.setSnapshot(dataSource: users)
+            guard let snapshot = owner.snapshot else { return }
             owner.dataSource?.apply(snapshot)
         }
         .disposed(by: self.disposeBag)
@@ -127,7 +127,7 @@ extension BlockUserFeature: UITableViewDelegate {
                     cell.isBlockButtonSelected.toggle()
                 })
                 .map({ user in
-                    (user.blockId,
+                    (user.blockedUser.id,
                      cell.isBlockButtonSelected)
                 })
                 .subscribe(onNext: { id, isSelected in

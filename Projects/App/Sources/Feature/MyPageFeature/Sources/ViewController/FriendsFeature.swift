@@ -150,6 +150,7 @@ public final class FriendsFeature: BaseFeature {
             let snapshot = owner.setFriendsSnapshot(friends: friends)
             owner.friendsSnapshot = snapshot
             owner.friendsDataSource?.apply(snapshot)
+            owner.friendsTableView.reloadData()
         }
         .disposed(by: self.disposeBag)
         
@@ -159,8 +160,17 @@ public final class FriendsFeature: BaseFeature {
             let snapshot = owner.setUsersSnapshot(users: users)
             owner.usersSnapshot = snapshot
             owner.usersDataSource?.apply(snapshot)
+            owner.usersTableView.reloadData()
         }
         .disposed(by: self.disposeBag)
+        
+        self.viewModel.blockToastTrigger
+            .asDriver(onErrorJustReturn: ())
+            .drive(with: self) { owner, _ in
+                let toastView = MYRToastView(type: .success, message: "해당 유저를 차단했습니다", followsUndockedKeyboard: false)
+                toastView.show(in: self.view)
+            }
+            .disposed(by: self.disposeBag)
     }
 }
 

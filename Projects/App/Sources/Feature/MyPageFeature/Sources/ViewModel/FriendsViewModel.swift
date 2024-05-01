@@ -17,6 +17,7 @@ public final class FriendsViewModel: BaseViewModel {
     public var actions: Action?
     
     public let blockedUsers = BehaviorRelay<[Block.BlockedUser]>(value: [])
+    public let blockToastTrigger = PublishRelay<Void>()
     
     public let fetchFriendsUseCase: FetchFriendsUseCaseProtocol
     public let searchUserUseCase: SearchUserUseCaseProtocol
@@ -97,7 +98,14 @@ public extension  FriendsViewModel {
             .flatMap({ owner, _ in
                 owner.deleteFriendUseCase.delete(friendID: friendID)
             })
-            .subscribe()
+            .withUnretained(self)
+            .flatMap({ owner, _ in
+                owner.fetchBlockedUserUseCase.fetch()
+            })
+            .do(onNext: { [weak self] _ in
+                self?.blockToastTrigger.accept(())
+            })
+            .bind(to: self.blockedUsers)
             .disposed(by: self.disposeBag)
     }
     

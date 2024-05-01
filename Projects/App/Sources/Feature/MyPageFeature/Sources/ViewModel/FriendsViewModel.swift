@@ -93,7 +93,7 @@ public extension  FriendsViewModel {
     }
     
     func blockFriend(friendID: String, userID: String) {
-        self.createBlockUseCase.create(friendID: friendID, userID: userID)
+        self.createBlockUseCase.create(userID)
             .withUnretained(self)
             .flatMap({ owner, _ in
                 owner.deleteFriendUseCase.delete(friendID: friendID)

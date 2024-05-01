@@ -15,13 +15,12 @@ public final class CreateBlockUseCaseImpl: CreateBlockUseCaseProtocol {
         self.blockRepository = blockRepository
     }
     
+    
     public func create(_ userID: String) -> Observable<Void> {
-        return Observable.just(())
+        self.blockRepository.createBlockUser(userID: userID)
     }
     
-    public func create(friendID: String, userID: String) -> Observable<Void> {
-        self.blockRepository.createBlockUser(friendID: friendID, userID: userID)
+    public func create() -> Observable<Void> {
+        
     }
-    
-    
 }

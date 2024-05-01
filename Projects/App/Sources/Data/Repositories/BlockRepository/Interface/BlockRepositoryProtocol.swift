@@ -10,6 +10,6 @@ import Foundation
 import RxSwift
 
 public protocol BlockRepositoryProtocol: AnyObject {
-    func createBlockUser(friendID: String, userID: String) -> Observable<Void>
-    func fetchBlocks() -> Observable<[Block]> 
+    func createBlockUser(userID: String) -> Observable<Void>
+    func fetchBlocks() -> Observable<[Block]>
 }

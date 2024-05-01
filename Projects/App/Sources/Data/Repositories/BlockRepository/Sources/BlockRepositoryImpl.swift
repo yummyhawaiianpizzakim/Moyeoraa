@@ -20,7 +20,7 @@ public final class BlockRepositoryImpl: BlockRepositoryProtocol {
         self.tokenManager = tokenManager
     }
     
-    public func createBlockUser(friendID: String, userID: String) -> Observable<Void> {
+    public func createBlockUser(userID: String) -> Observable<Void> {
         guard let myID = self.tokenManager.getToken(with: .userId)
         else { return .error(TokenManagerError.notFound) }
         

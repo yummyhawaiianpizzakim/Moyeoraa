@@ -49,8 +49,12 @@ public final class FriendsViewModel: BaseViewModel {
         let friends = self.fetchFriendsUseCase.fetch().share()
         let searchedUsers = input.searchUsers
             .withUnretained(self)
-            .flatMap { owner, keyword in
-                owner.searchUserUseCase.search(text: keyword)
+            .flatMap { owner, keyword -> Observable<[User]> in
+                if keyword == "" {
+                    return Observable.just([])
+                }
+                
+                return owner.searchUserUseCase.search(text: keyword)
             }
             .withUnretained(self)
             .map { owner, users in

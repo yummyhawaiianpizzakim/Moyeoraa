@@ -58,7 +58,23 @@ public final class UserRepositoryImpl: UserRepositoryProtocol {
             })
             .map { $0.filter { $0.id != myID } }
             .map { $0.removingDuplicates() }
-//            .debug("getUsersInfo(_ keyword")
+    }
+    
+    public func updateUserInfo(imageURL: String?, name: String) -> Observable<Void> {
+        guard let id = self.tokenManager.getToken(with: .userId)
+        else { return .error(TokenManagerError.notFound) }
+        
+        var values: [String: Any] = [:]
+        
+        if let imageURL {
+            values.updateValue(imageURL, forKey: "profileImage")
+        }
+        
+        values.updateValue(name, forKey: "name")
+        
+        return self.firebaseService
+            .updateDocument(collection: .users, document: id, values: values)
+            .asObservable()
     }
 }
 

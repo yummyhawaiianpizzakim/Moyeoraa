@@ -14,4 +14,5 @@ public protocol UserRepositoryProtocol: AnyObject {
     func getUserInfo(_ id: String) -> Observable<User>
     func getUsersInfo(_ ids: [String]) -> Observable<[User]>
     func getUsersInfo(_ keyword: String) -> Observable<[User]> 
+    func updateUserInfo(imageURL: String?, name: String) -> Observable<Void> 
 }

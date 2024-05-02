@@ -55,7 +55,7 @@ private extension MYRSearchView {
     }
     
     func configureAttributes() {
-        
+        self.backgroundColor = .white
     }
     
 }

@@ -26,9 +26,17 @@ public final class MyPageCoordinator: CoordinatorProtocol {
     }
     
     private func showMyPageFeature() {
-        let fetchUserUseCase = FetchUserUseCaseSpy()
+        let firebaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let authRepository = AuthRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        
+        let signOutUseCase = SignOutUseCaseImpl(authRepository: authRepository)
+        let fetchUserUseCase = FetchUserUseCaseImpl(userRepository: userRepository)
+//        let fetchUserUseCase = FetchUserUseCaseSpy()
         let updateNotificationUseCase = UpdateNotificationUseCaseSpy()
-        let signOutUseCase = SignOutUseCaseSpy()
+//        let signOutUseCase = SignOutUseCaseSpy()
         let dropOutUseCase = DropOutUseCaseSpy()
         
         let vm = MyPageViewModel(
@@ -40,7 +48,9 @@ public final class MyPageCoordinator: CoordinatorProtocol {
         vm.setAction(MyPageViewModelActions(
             showEditProfileFeature: showEditProfileFeature,
             showFriendsFeature: showFriendsFeature,
-            showBlockUserFeature: showBlockUserFeature)
+            showBlockUserFeature: showBlockUserFeature,
+            finishMainTapFeature: finishMainTapFeature
+        )
         )
         let vc = MyPageFeature(viewModel: vm)
         
@@ -69,6 +79,11 @@ public final class MyPageCoordinator: CoordinatorProtocol {
         coordinator.finishDelegate = self
         self.childCoordinators.append(coordinator)
         coordinator.start()
+    }
+    
+    lazy var finishMainTapFeature: () -> Void = {
+        self.finish()
+        self.navigation.popToRootViewController(animated: true)
     }
 }
 

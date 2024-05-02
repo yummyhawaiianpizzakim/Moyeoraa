@@ -12,4 +12,5 @@ public protocol AuthRepositoryProtocol {
     func checkUser(uid: String) -> Single<Bool>
     func createUser(name: String, profileURL: String?, tagNumber: Int) -> Observable<Void>
     func updateFcmToken() -> Observable<Void> 
+    func signOut() -> Observable<Void> 
 }

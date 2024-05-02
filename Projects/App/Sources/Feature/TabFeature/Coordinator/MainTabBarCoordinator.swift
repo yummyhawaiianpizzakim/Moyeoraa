@@ -107,6 +107,7 @@ private extension MainTabBarCoordinator {
 
 extension MainTabBarCoordinator: CoordinatorFinishDelegate {
     public func coordinatorDidFinished(childCoordinator: CoordinatorProtocol) {
-        
+        self.navigation.popToRootViewController(animated: false)
+        self.finish()
     }
 }

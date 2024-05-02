@@ -9,5 +9,5 @@
 import RxSwift
 
 public protocol CreateBlockUseCaseProtocol: AnyObject {
-    func create(_ blockID: String) -> Observable<Void>
+    func create(_ userID: String) -> Observable<Void>
 }

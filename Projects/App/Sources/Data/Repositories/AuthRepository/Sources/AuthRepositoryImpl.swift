@@ -7,6 +7,7 @@
 //
 
 import RxSwift
+import FirebaseAuth
 
 public final class AuthRepositoryImpl: AuthRepositoryProtocol {
     private let firebaseService: FireBaseServiceProtocol
@@ -73,5 +74,23 @@ public final class AuthRepositoryImpl: AuthRepositoryProtocol {
         )
         .asObservable()
         .debug("updateFcmToken")
+    }
+    
+    public func signOut() -> Observable<Void> {
+        return Observable.create { [weak self] observable in
+            guard let self else { return Disposables.create() }
+            
+            do {
+                try Auth.auth().signOut()
+                self.tokenManager.deleteToken(with: .userId)
+                observable.onNext(())
+                observable.onCompleted()
+            } catch let error {
+                observable.onError(error)
+                observable.onCompleted()
+            }
+            
+            return Disposables.create()
+        }
     }
 }

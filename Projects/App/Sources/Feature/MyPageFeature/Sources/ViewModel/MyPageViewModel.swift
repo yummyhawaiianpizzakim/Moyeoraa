@@ -15,6 +15,7 @@ public struct MyPageViewModelActions {
     var showEditProfileFeature: (_ userID: String) -> Void
     var showFriendsFeature: (_ userID: String) -> Void
     var showBlockUserFeature: (_ userID: String) -> Void
+    var finishMainTapFeature: () -> Void
 }
 
 public final class MyPageViewModel: BaseViewModel {
@@ -110,7 +111,9 @@ public extension MyPageViewModel {
     
     func signOut() {
         self.signOutUseCase.signOut()
-            .subscribe()
+            .subscribe(with: self, onNext: { owner, _ in
+                owner.actions?.finishMainTapFeature()
+            })
             .disposed(by: self.disposeBag)
     }
     

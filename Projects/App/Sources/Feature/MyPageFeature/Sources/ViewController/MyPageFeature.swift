@@ -15,6 +15,8 @@ public final class MyPageFeature: BaseFeature {
     
     private var dataSource: UITableViewDiffableDataSource<MyPageSection, MyPageCellType>?
     
+    private lazy var titleView = MYRNavigationView(title: "마이페이지")
+    
     private lazy var profileView = MYRIconView(size: .custom(.init(width: 72, height: 72)), isCircle: true)
     
     private lazy var labelsStackView: UIStackView = {
@@ -58,6 +60,8 @@ public final class MyPageFeature: BaseFeature {
     
     public override func configureAttributes() {
         self.dataSource = self.generateDataSource()
+        self.setNavigationBar(titleView: self.titleView, rightButtonItem: nil)
+        self.view.backgroundColor = .white
     }
     
     public override func configureUI() {

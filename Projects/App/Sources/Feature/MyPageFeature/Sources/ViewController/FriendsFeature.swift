@@ -9,6 +9,7 @@
 import UIKit
 import RxSwift
 import RxCocoa
+import RxRelay
 
 public final class FriendsFeature: BaseFeature {
     private let viewModel: FriendsViewModel
@@ -22,7 +23,6 @@ public final class FriendsFeature: BaseFeature {
     var currentPage: Int = 0 {
         didSet {
             // from segmentedControl -> pageViewController 업데이트
-//            print(oldValue, self.currentPage)
             let direction: UIPageViewController.NavigationDirection = oldValue <= self.currentPage ? .forward : .reverse
             self.pageViewController.setViewControllers(
                 [dataViewControllers[self.currentPage]],
@@ -77,6 +77,7 @@ public final class FriendsFeature: BaseFeature {
     }
     
     public override func configureAttributes() {
+        self.view.backgroundColor = .white
         self.setNavigationBar(isBackButton: true, titleView: self.searchView, rightButtonItem: nil)
         self.friendsDataSource = self.generateFriendsDataSource()
         self.usersDataSource = self.generateUsersDataSource()
@@ -85,7 +86,6 @@ public final class FriendsFeature: BaseFeature {
     public override func configureUI() {
         [self.segmentedControl,
          self.pageViewController.view
-//         self.friendsTableView
         ]
             .forEach { self.view.addSubview($0) }
         
@@ -150,6 +150,7 @@ public final class FriendsFeature: BaseFeature {
             let snapshot = owner.setFriendsSnapshot(friends: friends)
             owner.friendsSnapshot = snapshot
             owner.friendsDataSource?.apply(snapshot)
+            owner.friendsTableView.reloadData()
         }
         .disposed(by: self.disposeBag)
         
@@ -159,8 +160,17 @@ public final class FriendsFeature: BaseFeature {
             let snapshot = owner.setUsersSnapshot(users: users)
             owner.usersSnapshot = snapshot
             owner.usersDataSource?.apply(snapshot)
+            owner.usersTableView.reloadData()
         }
         .disposed(by: self.disposeBag)
+        
+        self.viewModel.blockToastTrigger
+            .asDriver(onErrorJustReturn: ())
+            .drive(with: self) { owner, _ in
+                let toastView = MYRToastView(type: .success, message: "해당 유저를 차단했습니다", followsUndockedKeyboard: false)
+                toastView.show(in: self.view)
+            }
+            .disposed(by: self.disposeBag)
     }
 }
 
@@ -205,9 +215,18 @@ extension FriendsFeature: UITableViewDelegate {
             guard let self,
                   let friendsCell = tableView.dequeueCell(FriendsTVC.self, for: indexPath)
             else { return UITableViewCell() }
+            
             friendsCell.bindCell(profileURL: friend.prfileImage ?? "",
                                  userName: friend.name,
                                  userTag: friend.tagNumber)
+            
+            friendsCell.blockFriendTrigger
+                .compactMap({ _ in
+                    self.friendsDataSource?.itemIdentifier(for: indexPath)
+                })
+                .map { ($0.id, $0.userID) }
+                .subscribe { self.showBlockAlert(friendID: $0.0, userID: $0.1) }
+                .disposed(by: friendsCell.disposeBag)
             
             return friendsCell
         }
@@ -219,7 +238,10 @@ extension FriendsFeature: UITableViewDelegate {
                   let searchUserCell = tableView.dequeueCell(SearchUserTVC.self, for: indexPath)
             else { return UITableViewCell() }
             searchUserCell.bindCell(profileURL: item.profileImage ?? "", userName: item.name, userTag: item.tagNumber)
-            
+
+            let isFriend = self.checkFriend(indexPath: indexPath)
+            searchUserCell.isPlusButtonSelected = isFriend
+
             searchUserCell.plusButton.rx.tap
                 .throttle(.seconds(1), scheduler: MainScheduler.instance)
                 .compactMap { _ in
@@ -257,6 +279,39 @@ extension FriendsFeature: UITableViewDelegate {
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 80
+    }
+    
+    private func showBlockAlert(friendID: String, userID: String) {
+        let alert = MYRAlertController(
+            title: "차단하기",
+            message: "정말로 차단하시겠습니까?",
+            preferredStyle: .alert
+        )
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
+        let block = UIAlertAction(title: "차단", style: .destructive) { [weak self] _ in
+            self?.viewModel.blockFriend(friendID: friendID, userID: userID)
+        }
+        
+        alert.addActions([cancel, block])
+        
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    private func checkFriend(indexPath: IndexPath) -> Bool {
+        guard let friends = self.friendsSnapshot?.itemIdentifiers,
+              let user = self.usersDataSource?.itemIdentifier(for: indexPath)
+        else {
+            return false
+        }
+        let friendsDict = Dictionary(uniqueKeysWithValues: friends.map { ($0.userID, $0) } )
+        
+        for (id, _) in friendsDict {
+            if user.id == id {
+                return true
+            }
+        }
+        
+        return false
     }
 }
 

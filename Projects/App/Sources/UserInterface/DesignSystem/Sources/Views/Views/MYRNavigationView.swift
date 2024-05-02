@@ -50,6 +50,7 @@ private extension MYRNavigationView {
         let label = MYRLabel(title, textColor: textColor, font: font)
         self.label = label
         self.label.textAlignment = .center
+        self.backgroundColor = .white
     }
     
     func configureUI() {

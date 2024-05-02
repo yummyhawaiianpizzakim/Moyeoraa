@@ -30,7 +30,7 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
         let dto = PlansDTO(
             id: plansID,
             title: title,
-            date: date.toStringWithCustomFormat(.hourAndMinute, locale: .current),
+            date: date.toStringWithCustomFormat(.yearToMinute, locale: .current),
             location: location.name,
             latitude: location.lat,
             longitude: location.lng,
@@ -85,6 +85,32 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
     
     public func deletePlans(id: String) -> Observable<Void> {
         self.firebaseService.deleteDocument(collection: .plans, document: id)
+            .asObservable()
+    }
+    
+    public func updatePlans(id: String, title: String, date: Date, location: Address, members: [User]) -> Observable<Void> {
+        let dateString = date.toStringWithCustomFormat(.yearToMinute)
+        var values: [String : Any] = [
+            "title": title,
+            "date": dateString,
+            "latitude":location.lat,
+            "longitude":location.lng,
+            "location":location.name,
+            "usersID": members.map({ $0.id }),
+        ]
+        
+        return self.firebaseService
+            .updateDocument(collection: .plans, document: id, values: values)
+            .asObservable()
+    }
+    
+    public func updatePlans(id: String, usersID: [String]) -> Observable<Void> {
+        var values: [String : Any] = [
+            "usersID": usersID
+        ]
+        
+        return self.firebaseService
+            .updateDocument(collection: .plans, document: id, values: values)
             .asObservable()
     }
 }

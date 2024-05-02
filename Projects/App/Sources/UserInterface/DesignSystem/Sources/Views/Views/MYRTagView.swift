@@ -43,6 +43,14 @@ public extension MYRTagView {
         self.xButton.rx.tap
             .asObservable()
     }
+    
+    func configureXButton() {
+        self.stackView.addArrangedSubview(self.xButton)
+        self.xButton.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.height.width.equalTo(28).priority(999)
+        }
+    }
 }
 
 private extension MYRTagView {
@@ -73,4 +81,5 @@ private extension MYRTagView {
             make.height.width.equalTo(28).priority(999)
         }
     }
+    
 }

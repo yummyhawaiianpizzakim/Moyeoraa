@@ -41,7 +41,7 @@ public final class HomeViewModel: BaseViewModel {
         let selectedDate = input.calendarViewSelectedDate.share()
         
         let plans = input.viewDidAppear
-//            .debug("viewDidAppear")
+            .debug("viewDidAppear")
             .withUnretained(self)
             .flatMap { owner, _ -> Observable<[Plans]> in
                 owner.fetchPlansUseCase.fetch(date: selectedDate)

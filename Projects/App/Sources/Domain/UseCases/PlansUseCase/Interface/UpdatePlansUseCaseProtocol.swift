@@ -10,5 +10,5 @@ import Foundation
 import RxSwift
 
 public protocol UpdatePlansUseCaseProtocol: AnyObject {
-    func update(title: String, date: Date, location: Address, members: [User]) -> Observable<Void> 
+    func update(id: String, title: String, date: Date, location: Address, members: [User]) -> Observable<Void>
 }

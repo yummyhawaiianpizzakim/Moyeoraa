@@ -31,6 +31,7 @@ public final class ModifyMemberTagCVC: UICollectionViewCell {
         super.prepareForReuse()
         self.userID = nil
         self.tagView.userLabel.setText(with: "")
+        self.tagView.configureXButton()
         self.disposeBag = DisposeBag()
     }
     
@@ -49,8 +50,13 @@ public final class ModifyMemberTagCVC: UICollectionViewCell {
 }
 
 public extension ModifyMemberTagCVC {
-    func bindCell(id: String, name: String) {
+    func bindCell(id: String, name: String, isMyself: Bool) {
         self.userID = id
         self.tagView.userLabel.setText(with: name)
+        if isMyself {
+            self.tagView.xButton.removeFromSuperview()
+        } else {
+            self.tagView.configureXButton()
+        }
     }
 }

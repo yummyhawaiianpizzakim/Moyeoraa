@@ -15,7 +15,7 @@ public final class UpdatePlansUseCaseSpy: UpdatePlansUseCaseProtocol {
         
     }
     
-    public func update(title: String, date: Date, location: Address, members: [User]) -> Observable<Void> {
+    public func update(id: String, title: String, date: Date, location: Address, members: [User]) -> Observable<Void> {
         let userID = "1234"
         let usersID = members.map { $0.id }
         let chatRoomID = UUID().uuidString

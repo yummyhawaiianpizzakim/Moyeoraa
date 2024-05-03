@@ -118,6 +118,7 @@ public final class PlansDetailFeature: BaseFeature {
     
     public override func bindViewModel() {
         let input = PlansDetailViewModel.Input(
+            viewDidAppear: self.rx.viewDidAppear.map({ _ in () }).asObservable(),
             enterChatButton: self.enterChatButton.rx.tap.asObservable(),
             deleteTrigger: self.deletePlansTrigger.asObservable()
         )

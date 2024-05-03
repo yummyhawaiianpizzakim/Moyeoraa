@@ -40,6 +40,7 @@ public final class PlansDetailViewModel: BaseViewModel {
     }
     
     public struct Input {
+        let viewDidAppear: Observable<Void>
         let enterChatButton: Observable<Void>
         let deleteTrigger: Observable<Void>
     }
@@ -55,7 +56,12 @@ public final class PlansDetailViewModel: BaseViewModel {
     }
     
     public func trnasform(input: Input) -> Output {
-        let plans = self.fetchPlansUseCase.fetch(id: self.plansID).share()
+        let plans = input.viewDidAppear
+            .withUnretained(self)
+            .flatMap { owner, _ in
+                owner.fetchPlansUseCase.fetch(id: owner.plansID)
+            }
+            .share()
         
         let title = plans.map({ $0.title }).asDriver(onErrorJustReturn: "")
         

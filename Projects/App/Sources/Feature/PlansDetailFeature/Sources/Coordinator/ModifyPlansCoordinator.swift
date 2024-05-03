@@ -30,15 +30,31 @@ public final class ModifyPlansCoordinator: CoordinatorProtocol {
     }
     
     private func showModifyPlansFeature() {
-        let createPlansUseCase = CreatePlansUseCaseSpy()
-        let updatePlansUseCase = UpdatePlansUseCaseSpy()
-        let fetchPlansUseCase = FetchPlansUseCaseSpy()
-        let fetchUserUseCase = FetchUserUseCaseSpy()
+        let firebaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let plansRepository = PlansRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let chatRepository = ChatRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        
+        let createPlansUseCase = CreatePlansUseCaseImpl(plansRepository: plansRepository, userRepository: userRepository, chatRepository: chatRepository)
+        let updatePlansUseCase = UpdatePlansUseCaseImpl(plansRepository: plansRepository)
+        let fetchPlansUseCase = FetchPlansUseCaseImpl(plansRepository: plansRepository)
+        let fetchUserUseCase = FetchUserUseCaseImpl(userRepository: userRepository)
+        let kickOutUserUseCase = KickOutUserUseCaseImpl(plansRepository: plansRepository)
+        
+//        let createPlansUseCase = CreatePlansUseCaseSpy()
+//        let updatePlansUseCase = UpdatePlansUseCaseSpy()
+//        let fetchPlansUseCase = FetchPlansUseCaseSpy()
+//        let fetchUserUseCase = FetchUserUseCaseSpy()
+        
         let vm = ModifyPlansViewModel(
             plansID: self.plansID,
             updatePlansUseCase: updatePlansUseCase,
             fetchPlansUseCase: fetchPlansUseCase,
-            fetchUserUseCase: fetchUserUseCase)
+            fetchUserUseCase: fetchUserUseCase,
+            kickOutUserUseCase: kickOutUserUseCase
+        )
         
         vm.setAction(
             ModifyPlansViewModelActions(
@@ -50,6 +66,7 @@ public final class ModifyPlansCoordinator: CoordinatorProtocol {
         )
         
         let vc = ModifyPlansFeature(viewModel: vm)
+        vc.hidesBottomBarWhenPushed = true
         
         self.navigation.pushViewController(vc, animated: true)
     }

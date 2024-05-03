@@ -45,6 +45,7 @@ public final class ModifyPlansFeature: BaseFeature {
         let titleView = MYRNavigationView(title: "약속 수정")
         self.setNavigationBar(isBackButton: true, titleView: titleView, rightButtonItem: nil)
         self.dataSource = self.generateDataSource()
+        self.view.backgroundColor = .white
     }
     public override func configureUI() {
         self.view.addSubview(self.scrollView)
@@ -88,8 +89,6 @@ public final class ModifyPlansFeature: BaseFeature {
     }
     
     public override func bindViewModel() {
-        
-        
         let input = ModifyPlansViewModel.Input(
             viewDidAppear: self.rx.viewDidAppear.map { _ in () }.asObservable(),
             titleText: self.contentView.titleTextField.rx.text.orEmpty.asObservable(),

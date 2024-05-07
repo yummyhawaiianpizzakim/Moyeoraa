@@ -10,7 +10,7 @@ import Foundation
 import RxSwift
 
 public protocol LocationRepositoryProtocol: AnyObject {
-    func updateLocation(chatRoomID: String, coordinate: Coordinate) -> Observable<Void>
+    func updateLocation(chatRoomID: String, coordinate: Coordinate, isArrived: Bool) -> Observable<Void> 
     func observe(chatRoomID: String) -> Observable<[SharedLocation]> 
     func removeObserve() -> Observable<Void> 
     func completeShare(chatroomId: String) -> Observable<Void>

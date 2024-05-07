@@ -99,6 +99,7 @@ public extension MYRMapUserCVC {
     func bindCell(profileURL: String, userName: String) {
         self.profileView.bindImage(urlString: profileURL)
         self.userName.setText(with: userName)
+        self.userName.textAlignment = .center
     }
     
     func bindIsArrived(_ isArrived: Bool) {

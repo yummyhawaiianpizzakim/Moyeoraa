@@ -42,6 +42,7 @@ public final class LocationShareViewModel: BaseViewModel {
     
     public struct Input {
         let myCoordinate: Observable<Coordinate>
+        let isArrived: Observable<Bool>
     }
     
     public struct Output {
@@ -72,7 +73,8 @@ public final class LocationShareViewModel: BaseViewModel {
         
         let coordinate = plans.map { Coordinate(lat: $0.latitude, lng: $0.longitude) }
         
-        let myCoordinate = input.myCoordinate.share()
+//        let myCoordinate = input.myCoordinate.share()
+        let myCoordinate = Observable.combineLatest(input.myCoordinate, input.isArrived).share()
         
         self.updateMyCoordinate(myCoordinate.take(1))
         self.updateMyCoordinate(myCoordinate
@@ -116,11 +118,12 @@ public extension LocationShareViewModel {
 }
 
 private extension LocationShareViewModel {
-    func updateMyCoordinate(_ coordinate: Observable<Coordinate>) {
-        coordinate
+    func updateMyCoordinate(_ input: Observable<(Coordinate, Bool)>) {
+        input
             .withUnretained(self)
-            .flatMap { owner, coordinate in
-                return owner.updateLocationUseCase.update(chatRoomID: owner.chatRoomID, coordinate: coordinate)
+            .flatMap { owner, val in
+                let (coordinate, isArrived) = val
+                return owner.updateLocationUseCase.update(chatRoomID: owner.chatRoomID, coordinate: coordinate, isArrived: isArrived)
             }
             .subscribe()
             .disposed(by: self.disposeBag)
@@ -147,4 +150,5 @@ private extension LocationShareViewModel {
         
         return result
     }
+    
 }

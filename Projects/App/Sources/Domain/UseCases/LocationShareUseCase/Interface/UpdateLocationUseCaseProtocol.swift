@@ -10,5 +10,5 @@ import Foundation
 import RxSwift
 
 public protocol UpdateLocationUseCaseProtocol {
-    func update(chatRoomID: String, coordinate: Coordinate) -> Observable<Void> 
+    func update(chatRoomID: String, coordinate: Coordinate, isArrived: Bool) -> Observable<Void> 
 }

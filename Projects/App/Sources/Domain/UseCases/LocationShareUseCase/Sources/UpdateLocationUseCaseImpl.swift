@@ -16,7 +16,7 @@ public final class UpdateLocationUseCaseImpl: UpdateLocationUseCaseProtocol {
         self.locationRepository = locationRepository
     }
     
-    public func update(chatRoomID: String, coordinate: Coordinate) -> Observable<Void> {
-        self.locationRepository.updateLocation(chatRoomID: chatRoomID, coordinate: coordinate)
+    public func update(chatRoomID: String, coordinate: Coordinate, isArrived: Bool) -> Observable<Void> {
+        self.locationRepository.updateLocation(chatRoomID: chatRoomID, coordinate: coordinate, isArrived: isArrived)
     }
 }

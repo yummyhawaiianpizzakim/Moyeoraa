@@ -82,9 +82,17 @@ public final class LocationShareFeature: BaseFeature {
         let myCoordinate = self.locationManager.rx.didUpdateLocations
             .compactMap({ $0.last })
             .map({ Coordinate(lat: $0.coordinate.latitude, lng: $0.coordinate.longitude) })
+            .share()
+        
+        let isArrived = myCoordinate
+            .withUnretained(self)
+            .map { owner, _ in
+            owner.isArrivedAtPlans()
+            }
         
         let input = LocationShareViewModel.Input(
-            myCoordinate: myCoordinate
+            myCoordinate: myCoordinate,
+            isArrived: isArrived
         )
         
         let output = self.viewModel.trnasform(input: input)
@@ -111,6 +119,7 @@ public final class LocationShareFeature: BaseFeature {
                     guard let annotation = owner.userAnnotationViews[sharedLocation.userID]
                     else { return }
                     owner.updateAnnotation(annotation: annotation, lat: sharedLocation.latitude, lng: sharedLocation.longitude)
+                    owner.bindCellIsArrived(userID: sharedLocation.userID, isArrived: sharedLocation.isArrived)
                 }
             }
             .disposed(by: self.disposeBag)
@@ -142,12 +151,9 @@ private extension LocationShareFeature {
                 let distanceFromCenter = abs((item.center.x - offset.x) - environment.container.contentSize.width / 2.0)
                 let scale = max(maximumZoomScale - (distanceFromCenter / containerWidth), minumumZoomScale)
                 item.transform = CGAffineTransform(scaleX: scale, y: scale)
-//                guard let cell = self?.memberCollectionView.cellForItem(at: item.indexPath) as? MYRMapUserCVC else { return }
                 if scale >= maximumZoomScale * 0.9 {
                     self?.selectAnnotation(at: item.indexPath)
                     print("self?.selectAnnotation(at:::: \(item.indexPath)")
-                } else {
-//                    cell.pause()
                 }
             }
         }
@@ -165,8 +171,9 @@ private extension LocationShareFeature {
     }
     
     func generateDataSource() -> UICollectionViewDiffableDataSource<Int, User> {
-        return UICollectionViewDiffableDataSource<Int, User>(collectionView: self.memberCollectionView) { collectionView, indexPath, item in
-            guard let cell = collectionView.dequeueCell(MYRMapUserCVC.self, for: indexPath)
+        return UICollectionViewDiffableDataSource<Int, User>(collectionView: self.memberCollectionView) { [weak self] collectionView, indexPath, item in
+            guard let self,
+                let cell = collectionView.dequeueCell(MYRMapUserCVC.self, for: indexPath)
             else { return UICollectionViewCell() }
             
             cell.bindCell(profileURL: item.profileImage ?? "", userName: item.name)
@@ -180,6 +187,22 @@ private extension LocationShareFeature {
         snapshot.appendSections([0])
         snapshot.appendItems(users)
         return snapshot
+    }
+    
+    func bindCellIsArrived(userID: String, isArrived: Bool) {
+        let snapshot = self.dataSource?.snapshot()
+        guard let user = snapshot?.itemIdentifiers.filter({ user in
+            user.id == userID
+        }).last else { return }
+        guard let section = snapshot?.sectionIdentifier(containingItem: user),
+              let itemIndex = snapshot?.indexOfItem(user),
+              let sectionIndex = snapshot?.indexOfSection(section)
+        else { return }
+        let indexPath = IndexPath(item: itemIndex, section: sectionIndex)
+        guard let cell = self.memberCollectionView.cellForItem(at: indexPath) as? MYRMapUserCVC
+        else { return }
+        
+        cell.bindIsArrived(isArrived)
     }
 }
 
@@ -220,6 +243,15 @@ extension LocationShareFeature: MKMapViewDelegate {
         print("selectAnnotation::")
     }
     
+    
+    func isArrivedAtPlans() -> Bool {
+        guard let currentLocation = self.locationManager.location else { return false }
+        
+        let distance = currentLocation.distance(from: .init(latitude: self.mapAnnotationView.coordinate.latitude, longitude: self.mapAnnotationView.coordinate.longitude))
+        
+        return distance <= 100.0 ? true : false
+    }
+    
     public func mapView(_ mapView: MKMapView, viewFor annotation: any MKAnnotation) -> MKAnnotationView? {
         switch annotation {
         case is UserAnnotationView:
@@ -231,7 +263,7 @@ extension LocationShareFeature: MKMapViewDelegate {
         case is MYRAnnotationView:
             guard let annotationView =  mapView.dequeueReusableAnnotationView(withIdentifier: "MYRAnnotationView", for: annotation) as? MYRAnnotationView
             else { return nil }
-            annotationView.image = .Moyeora.moyeoraLogo
+            annotationView.image = .Moyeora.pin
             return annotationView
         default:
             return nil

@@ -19,12 +19,12 @@ public final class LocationRepositoryImpl: LocationRepositoryProtocol {
         self.tokenManager = tokenManager
     }
     
-    public func updateLocation(chatRoomID: String, coordinate: Coordinate) -> Observable<Void> {
+    public func updateLocation(chatRoomID: String, coordinate: Coordinate, isArrived: Bool) -> Observable<Void> {
         guard let userID = tokenManager.getToken(with: .userId) else {
             return .error(TokenManagerError.notFound)
         }
         
-        let sharedLocation = SharedLocation(userID: userID, latitude: coordinate.lat, longitude: coordinate.lng)
+        let sharedLocation = SharedLocation(userID: userID, latitude: coordinate.lat, longitude: coordinate.lng, isArrived: isArrived)
         
         guard let values = sharedLocation.asDictionary else {
             return .error(FireStoreError.unknown)

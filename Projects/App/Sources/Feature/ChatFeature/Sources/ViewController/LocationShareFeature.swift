@@ -42,6 +42,8 @@ public final class LocationShareFeature: BaseFeature {
         return view
     }()
     
+    private lazy var plansLocationButton = MYRIconButton(image: .Moyeora.pin, backgroundColor: .neutral(.white), cornerRadius: 8)
+    
     public init(viewModel: LocationShareViewModel) {
         self.viewModel = viewModel
         super.init()
@@ -64,7 +66,8 @@ public final class LocationShareFeature: BaseFeature {
     
     public override func configureUI() {
         [self.mapView,
-         self.memberCollectionView
+         self.memberCollectionView,
+         self.plansLocationButton
         ].forEach { self.view.addSubview($0) }
         
         self.mapView.snp.makeConstraints { make in
@@ -75,6 +78,12 @@ public final class LocationShareFeature: BaseFeature {
             make.horizontalEdges.equalToSuperview()
             make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(-16)
             make.height.equalTo(126)
+        }
+        
+        self.plansLocationButton.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().offset(-20)
+            make.height.width.equalTo(48)
+            make.bottom.equalTo(self.memberCollectionView.snp.top).offset(-8)
         }
     }
     
@@ -109,9 +118,18 @@ public final class LocationShareFeature: BaseFeature {
         .disposed(by: self.disposeBag)
         
         output.mapCoordinate.drive(with: self) { owner, coordinate in
-            owner.setMapView(coordinate)
+            owner.setPlansLocation(coordinate)
+            owner.setMapAnnotation(to: coordinate)
         }
         .disposed(by: self.disposeBag)
+        
+        self.plansLocationButton.rx.tap
+            .withLatestFrom(output.mapCoordinate)
+            .asDriver(onErrorDriveWith: Driver<Coordinate>.empty())
+            .drive(with: self) { owner, coordinate in
+                owner.setPlansLocation(coordinate)
+            }
+            .disposed(by: self.disposeBag)
         
         output.sharedLocations
             .drive(with: self) { owner, sharedLocations in
@@ -207,7 +225,7 @@ private extension LocationShareFeature {
 }
 
 extension LocationShareFeature: MKMapViewDelegate {
-    private func setMapView(_ coordinate: Coordinate, animated: Bool = true) {
+    private func setPlansLocation(_ coordinate: Coordinate, animated: Bool = true) {
         let coordinate2D = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lng)
         guard !(coordinate2D.latitude == .zero) else { return }
         
@@ -215,7 +233,6 @@ extension LocationShareFeature: MKMapViewDelegate {
         let region = MKCoordinateRegion(center: coordinate2D, span: span)
         
         self.mapView.setRegion(region, animated: animated)
-        self.setMapAnnotation(to: coordinate)
     }
     
     private func setMapAnnotation(to coordinate: Coordinate) {

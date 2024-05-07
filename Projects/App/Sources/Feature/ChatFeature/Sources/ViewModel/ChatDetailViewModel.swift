@@ -52,7 +52,7 @@ public final class ChatDetailViewModel: BaseViewModel {
             .observe(chatRoomID: self.chatRoomID)
             .do(onNext: { [weak self] chats in
                 self?.chats = chats
-                print("self?.chats::\(self?.chats)")
+//                print("self?.chats::\(self?.chats)")
             })
             .share()
         

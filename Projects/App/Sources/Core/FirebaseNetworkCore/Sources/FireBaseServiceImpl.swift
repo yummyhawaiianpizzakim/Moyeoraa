@@ -20,6 +20,7 @@ public enum FireStoreError: Error, LocalizedError {
 public final class FireBaseServiceImpl: FireBaseServiceProtocol {
     static let shared = FireBaseServiceImpl()
     private let database: Firestore
+    private var sharedLocationListener: ListenerRegistration?
     
     public init(
         firestore: Firestore = Firestore.firestore()
@@ -270,6 +271,19 @@ public final class FireBaseServiceImpl: FireBaseServiceProtocol {
         }
     }
     
+    public func deleteDocument(documents: [String]) -> Single<Void> {
+        return Single.create { [weak self] single in
+            guard let self else { return Disposables.create() }
+            
+            self.database.document(documents.joined(separator: "/"))
+                .delete { error in
+                    if let error = error { single(.failure(error)) }
+                    single(.success(()))
+                }
+            return Disposables.create()
+        }
+    }
+    
     public func deleteDocuments(collections: [(FireStoreCollection, String)]) -> Single<Void> {
         let batch = self.database.batch()
         
@@ -391,7 +405,40 @@ public extension FireBaseServiceImpl {
             return Disposables.create()
         }
     }
+    
 }
+//MARK: sharedLocation
+public extension FireBaseServiceImpl {
+    func observeSharedLocation(documents: [String]) -> Observable<[FirebaseData]> {
+        return Observable.create { [weak self] observable in
+            guard let self else { return Disposables.create() }
+            self.sharedLocationListener = self.database
+                .collection(documents.joined(separator: "/"))
+                .addSnapshotListener { snapshot, error in
+                    if let error = error { observable.onError(error) }
+                    guard let snapshot = snapshot else {
+                        observable.onError(FireStoreError.unknown)
+                        return
+                    }
+                    let data = snapshot.documents.map { $0.data() }
+                    
+                    observable.onNext(data)
+                }
+            return Disposables.create()
+        }
+    }
+    
+    func removeSharedLocationObserve() -> Single<Void> {
+        return Single.create { [weak self] single in
+            guard let self 
+            else { return Disposables.create() }
+            self.sharedLocationListener?.remove()
+            single(.success(()))
+            return Disposables.create()
+        }
+    }
+}
+
     //MARK: Image
 public extension FireBaseServiceImpl {
     func uploadImage(imageData: Data) -> Single<String> {

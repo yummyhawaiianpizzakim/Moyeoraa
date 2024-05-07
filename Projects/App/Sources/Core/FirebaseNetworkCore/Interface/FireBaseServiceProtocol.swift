@@ -30,11 +30,15 @@ public protocol FireBaseServiceProtocol {
     
     func deleteDocument(collection: FireStoreCollection, document: String) -> Single<Void>
     func deleteDocument(collectionPaths: [String], document: String) -> Single<Void> 
+    func deleteDocument(documents: [String]) -> Single<Void>
     
     func observer(collection: FireStoreCollection, document: String) -> Observable<FirebaseData>
     func observer(documents: [String]) -> Observable<FirebaseData>
     func observe(collection: FireStoreCollection, field: String, in values: [Any]) -> Observable<[FirebaseData]>
     func observe(documents: [String]) -> Observable<[FirebaseData]>
+    
+    func observeSharedLocation(documents: [String]) -> Observable<[FirebaseData]> 
+    func removeSharedLocationObserve() -> Single<Void> 
     
     func uploadImage(imageData: Data) -> Single<String>
 }

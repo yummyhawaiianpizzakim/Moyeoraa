@@ -37,12 +37,6 @@ public final class ChatDetailFeature: BaseFeature {
         let title = self.viewModel.chatRoomTitle
         let view = MYRNavigationView(title: title)
         self.setNavigationBar(isBackButton: true, titleView: view, rightButtonItem: nil)
-        
-        self.chatInputView.mapButtonDidTap
-            .subscribe { _ in
-                print("aaaa")
-            }
-            .disposed(by: self.disposeBag)
     }
     
     public override func configureUI() {
@@ -79,7 +73,7 @@ public final class ChatDetailFeature: BaseFeature {
         
         let output = self.viewModel.trnasform(input: input)
         output.chats
-            .debug("chats")
+//            .debug("chats")
             .drive(with: self) { owner, chats in
                 owner.dataSource = owner.generateDataSource()
                 let snapshot = owner.setSnapshot(chats: chats)

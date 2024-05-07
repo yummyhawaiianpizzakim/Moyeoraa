@@ -14,7 +14,8 @@ public protocol PlansRepositoryProtocol: AnyObject {
     func fetchPlansArr() -> Observable<[Plans]> 
     func fetchPlansArr(date: Date) -> Observable<[Plans]> 
     func fetchPlans(id: String) -> Observable<Plans>
-    func deletePlans(id: String) -> Observable<Void> 
+    func fetchPlans(chatRoomID: String) -> Observable<Plans> 
+    func deletePlans(id: String) -> Observable<Void>
     func updatePlans(id: String, title: String, date: Date, location: Address, members: [User]) -> Observable<Void> 
     func updatePlans(id: String, usersID: [String]) -> Observable<Void> 
 }

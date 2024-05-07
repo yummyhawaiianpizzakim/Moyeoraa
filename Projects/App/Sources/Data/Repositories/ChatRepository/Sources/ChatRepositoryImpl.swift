@@ -65,7 +65,7 @@ public final class ChatRepositoryImpl: ChatRepositoryProtocol {
         
         return self.firebaseService
             .observe(documents: ["chatrooms", chatRoomID, "chats"])
-            .debug("observeChat(chatRoomID: String)")
+//            .debug("observeChat(chatRoomID: String)")
             .map { $0.compactMap {
                 $0.toObject(ChatDTO.self)?.toEntity(myID: userID) }
             }

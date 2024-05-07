@@ -51,9 +51,24 @@ public final class ChatDetailCoordinator: CoordinatorProtocol {
             updateIsCheckedUseCase: updateIsCheckedUseCase
         )
         
+        vm.setAction(ChatDetailViewModelActions(showLocationShareFeature: showLocationShareFeature))
+        
         let vc = ChatDetailFeature(viewModel: vm)
         vc.hidesBottomBarWhenPushed = true
         
         self.navigation.pushViewController(vc, animated: true)
+    }
+    
+    private lazy var showLocationShareFeature: (_ id: String) -> Void = { id in
+        let coordinator = LocationShareCoordinator(chatRoomID: id, navigation: self.navigation)
+        self.childCoordinators.append(coordinator)
+        coordinator.finishDelegate = self
+        coordinator.start()
+    }
+}
+
+extension ChatDetailCoordinator: CoordinatorFinishDelegate {
+    public func coordinatorDidFinished(childCoordinator: CoordinatorProtocol) {
+        
     }
 }

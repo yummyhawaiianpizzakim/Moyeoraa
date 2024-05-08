@@ -29,6 +29,14 @@ public final class UserAnnotationView: MKAnnotationView, MKAnnotation {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    public override func prepareForReuse() {
+        super.prepareForReuse()
+        self.userID = nil
+        self.userImageURLString = nil
+        self.imageView.removeFromSuperview()
+    }
+    
     private func configureAttributes() {
         self.clipsToBounds = true
         self.bounds.size = .init(width: 50, height: 50)

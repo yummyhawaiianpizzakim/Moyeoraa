@@ -277,4 +277,11 @@ extension PlansDetailFeature: MKMapViewDelegate {
     private func setAnnotation(to coordinate: Coordinate) {
         self.annotationView.coordinate = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lng)
     }
+    
+    public func mapView(_ mapView: MKMapView, viewFor annotation: any MKAnnotation) -> MKAnnotationView? {
+        guard let annotationView = annotation as? MYRAnnotationView
+        else { return nil }
+        annotationView.image = .Moyeora.pin
+        return annotationView
+    }
 }

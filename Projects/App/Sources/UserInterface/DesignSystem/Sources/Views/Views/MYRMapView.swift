@@ -19,7 +19,7 @@ public final class MYRMapView: MKMapView {
         button.layer.cornerRadius = 50.0 / 2
         button.clipsToBounds = true
         button.layer.borderColor = UIColor.moyeora(.neutral(.balck)).cgColor
-
+        button.mapView?.userTrackingMode = .none
         return button
     }()
 
@@ -39,9 +39,10 @@ public final class MYRMapView: MKMapView {
 
     private func configure() {
         self.mapType = .standard
-        self.showsUserLocation = true
+        self.showsUserLocation = false
         self.showsCompass = false
-        self.setUserTrackingMode(.follow, animated: true)
+//        self.setUserTrackingMode(.follow, animated: true)
+        self.userTrackingMode = .none
         self.isPitchEnabled = false
     }
 

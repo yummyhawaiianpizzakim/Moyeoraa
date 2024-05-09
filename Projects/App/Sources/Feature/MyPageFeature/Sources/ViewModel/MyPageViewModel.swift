@@ -119,7 +119,9 @@ public extension MyPageViewModel {
     
     func dropOut() {
         self.dropOutUseCase.dropOut()
-            .subscribe()
+            .subscribe(with: self, onNext: { owner, _ in
+                owner.actions?.finishMainTapFeature()
+            })
             .disposed(by: self.disposeBag)
     }
 }

@@ -214,6 +214,34 @@ public final class FireBaseServiceImpl: FireBaseServiceProtocol {
         }
     }
     
+    public func getDocument(collection: FireStoreCollection, field: String, fieldIn: String, keyword value: Any, arrayContainsAny values: [Any]) -> Single<[FirebaseData]> {
+        return Single.create { [weak self] single in
+            guard let self else { return Disposables.create() }
+            
+            let startValue = "\(value)"
+            let endValue = "\(value)\u{f8ff}"
+            
+            var queries = values
+            if queries.isEmpty { queries.append("") }
+            
+            self.database.collection(collection.name)
+                .whereField(field, isGreaterThanOrEqualTo: startValue)
+                .whereField(field, isLessThanOrEqualTo: endValue)
+                .whereField(fieldIn, arrayContainsAny: queries)
+                .getDocuments { snapshot, error in
+                    if let error = error { single(.failure(error)) }
+                    
+                    guard let snapshot = snapshot else {
+                        single(.failure(FireStoreError.unknown))
+                        return
+                    }
+                    let data = snapshot.documents.map { $0.data() }
+                    single(.success(data))
+                }
+            return Disposables.create()
+        }
+    }
+    
     public func createDocument(collection: FireStoreCollection, document: String, values: FirebaseData) -> Single<Void> {
         return Single.create { [weak self] single in
             guard let self else { return Disposables.create() }

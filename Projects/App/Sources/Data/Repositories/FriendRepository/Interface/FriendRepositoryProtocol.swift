@@ -14,4 +14,5 @@ public protocol FriendRepositoryProtocol: AnyObject {
     func createFriend(userInfo: User) -> Observable<Void> 
     func deleteFriend(userInfo: User) -> Observable<Void> 
     func deleteFriend(friendID: String) -> Observable<Void> 
+    func deleteFriendsWhenDeleteUserInfo() -> Observable<Void>
 }

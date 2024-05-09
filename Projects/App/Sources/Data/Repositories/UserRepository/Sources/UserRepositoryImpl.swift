@@ -76,6 +76,14 @@ public final class UserRepositoryImpl: UserRepositoryProtocol {
             .updateDocument(collection: .users, document: id, values: values)
             .asObservable()
     }
+    
+    public func deleteUserInfo() -> Single<Void> {
+        guard let id = self.tokenManager.getToken(with: .userId)
+        else { return .error(TokenManagerError.notFound) }
+        
+        return self.firebaseService
+            .deleteDocument(collection: .users, document: id)
+    }
 }
 
 private extension UserRepositoryImpl {

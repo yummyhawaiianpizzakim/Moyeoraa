@@ -22,4 +22,12 @@ public extension String {
     static var errorDetected: String {
         return "오류가 발생했습니다.\n잠시 후 다시 시도해주세요."
     }
+    
+    func extractFilePath() -> String? {
+        guard let url = URL(string: self),
+              let pathComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)?.path.components(separatedBy: "/") else {
+            return nil
+        }
+        return pathComponents.last
+    }
 }

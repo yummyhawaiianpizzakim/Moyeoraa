@@ -41,5 +41,5 @@ public protocol FireBaseServiceProtocol {
     func removeSharedLocationObserve() -> Single<Void> 
     
     func uploadImage(imageData: Data) -> Single<String>
-    func deleteImage(imageString: String) -> Single<Void> 
+    func deleteImage(path: String) -> Single<Void> 
 }

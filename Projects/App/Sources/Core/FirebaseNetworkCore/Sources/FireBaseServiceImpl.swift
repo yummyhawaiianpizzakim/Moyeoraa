@@ -492,9 +492,9 @@ public extension FireBaseServiceImpl {
         }
     }
     
-    func deleteImage(imageString: String) -> Single<Void> {
+    func deleteImage(path: String) -> Single<Void> {
         return Single.create { single in
-            let imageName = imageString
+            let imageName = path
             let firebaseReference = Storage.storage().reference().child("\(imageName)")
             
             firebaseReference.delete { error in

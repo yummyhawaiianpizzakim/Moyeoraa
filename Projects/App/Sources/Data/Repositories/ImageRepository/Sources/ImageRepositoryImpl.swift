@@ -24,7 +24,8 @@ public final class ImageRepositoryImpl: ImageRepositoryProtocol {
     }
     
     public func deleteImage(imageString: String) -> Observable<Void> {
-        return self.fireBaseService.deleteImage(imageString: imageString)
+        guard let path = imageString.extractFilePath() else { return .error(LocalError.transformType) }
+        return self.fireBaseService.deleteImage(path: path)
             .asObservable()
     }
     

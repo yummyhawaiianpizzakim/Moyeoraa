@@ -38,13 +38,15 @@ public final class EditProfileCoordinator: CoordinatorProtocol {
         let fetchUserUseCase = FetchUserUseCaseImpl(userRepository: userRepository)
         let updateUserUseCase = UpdateUserUseCaseImpl(userRepository: userRepository)
         let uploadImageUseCase = UploadImageUseCaseImpl(imageRepository: imageRepository)
+        let deleteImageUseCase = DeleteImageUseCaseImpl(imageRepository: imageRepository)
 //        let fetchUserUseCase = FetchUserUseCaseSpy()
 //        let updateUserUseCase = UpdateUserUseCaseSpy()
 //        let uploadImageUseCase = UploadImageUseCaseSpy()
         let vm = EditProfileViewModel(
             fetchUserUseCase: fetchUserUseCase,
             updateUserUseCase: updateUserUseCase,
-            uploadImageUseCase: uploadImageUseCase
+            uploadImageUseCase: uploadImageUseCase, 
+            deleteImageUseCase: deleteImageUseCase
         )
         
         vm.setAction(EditProfileViewModelActions(finishEditProfileFeature: finishEditProfileFeature))

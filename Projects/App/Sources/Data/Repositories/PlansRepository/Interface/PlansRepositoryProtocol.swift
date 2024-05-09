@@ -18,4 +18,5 @@ public protocol PlansRepositoryProtocol: AnyObject {
     func deletePlans(id: String) -> Observable<Void>
     func updatePlans(id: String, title: String, date: Date, location: Address, members: [User]) -> Observable<Void> 
     func updatePlans(id: String, usersID: [String]) -> Observable<Void> 
+    func updatePlansWhenDeleteUserInfo() -> Observable<Void> 
 }

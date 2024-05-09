@@ -31,13 +31,17 @@ public final class MyPageCoordinator: CoordinatorProtocol {
         
         let authRepository = AuthRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
         let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let plansRepository = PlansRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let friendRepository = FriendRepositoryImpl(fireBaseService: firebaseService, tokenManager: tokenManager)
         
         let signOutUseCase = SignOutUseCaseImpl(authRepository: authRepository)
         let fetchUserUseCase = FetchUserUseCaseImpl(userRepository: userRepository)
-//        let fetchUserUseCase = FetchUserUseCaseSpy()
         let updateNotificationUseCase = UpdateNotificationUseCaseSpy()
+        let dropOutUseCase = DropOutUseCaseImpl(authRepository: authRepository, userRepository: userRepository, plansRepository: plansRepository, friendRepository: friendRepository)
+        
+//        let fetchUserUseCase = FetchUserUseCaseSpy()
 //        let signOutUseCase = SignOutUseCaseSpy()
-        let dropOutUseCase = DropOutUseCaseSpy()
+//        let dropOutUseCase = DropOutUseCaseSpy()
         
         let vm = MyPageViewModel(
             fetchUserUseCase: fetchUserUseCase,
@@ -49,9 +53,9 @@ public final class MyPageCoordinator: CoordinatorProtocol {
             showEditProfileFeature: showEditProfileFeature,
             showFriendsFeature: showFriendsFeature,
             showBlockUserFeature: showBlockUserFeature,
-            finishMainTapFeature: finishMainTapFeature
+            finishMainTapFeature: finishMainTapFeature)
         )
-        )
+        
         let vc = MyPageFeature(viewModel: vm)
         
         self.navigation.pushViewController(vc, animated: true)

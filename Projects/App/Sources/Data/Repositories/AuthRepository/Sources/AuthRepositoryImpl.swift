@@ -93,4 +93,28 @@ public final class AuthRepositoryImpl: AuthRepositoryProtocol {
             return Disposables.create()
         }
     }
+    
+    public func dropOut() -> Single<Void> {
+        guard let user = Auth.auth().currentUser 
+        else { return .error(FireStoreError.unknown) }
+        
+        return Single.create { [weak self] single in
+            guard let self else { return Disposables.create() }
+            
+            user.delete { error in
+                if let error {
+                    single(.failure(error))
+                    return
+                }
+                
+                if self.tokenManager.deleteToken(with: .userId) && self.tokenManager.deleteToken(with: .fcmToken) {
+                    single(.success(()))
+                } else {
+                    single(.failure(FireStoreError.unknown))
+                }
+            }
+            
+            return Disposables.create()
+        }
+    }
 }

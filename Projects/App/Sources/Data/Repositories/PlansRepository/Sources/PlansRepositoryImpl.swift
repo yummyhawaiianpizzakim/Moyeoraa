@@ -69,10 +69,13 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
     }
     
     public func fetchPlansArr(date: Date) -> Observable<[Plans]> {
+        guard let userID = self.tokenManager.getToken(with: .userId)
+        else { return .error(TokenManagerError.notFound)}
+        
         let date = date.toStringWithCustomFormat(.yearToDay)
         
-        return self.firebaseService.getDocument(collection: .plans, field: "date", keyword: date)
-//            .debug("fetchPlansArr(date: ")
+        return self.firebaseService.getDocument(collection: .plans, field: "date", fieldIn: "usersID", keyword: date, arrayContainsAny: [userID])
+            .debug("fetchPlansArr(date: ")
             .map { $0.compactMap { $0.toObject(PlansDTO.self)?.toEntity() } }
             .asObservable()
     }
@@ -120,4 +123,27 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
             .updateDocument(collection: .plans, document: id, values: values)
             .asObservable()
     }
+    
+    public func updatePlansWhenDeleteUserInfo() -> Observable<Void> {
+        guard let userID = self.tokenManager.getToken(with: .userId) else {
+            return .error(TokenManagerError.notFound)
+        }
+        
+        return self.fetchPlansArr()
+            .withUnretained(self)
+            .flatMap { owner, plansArr -> Observable<Void> in
+                if plansArr.isEmpty {
+                    return Observable.just(())
+                }
+                // 모든 plans에서 userID를 제거하는 작업의 Observable을 생성
+                let updateObservables = plansArr.map { plans -> Observable<Void> in
+                    let filteredUserIDs = plans.usersID.filter { $0 != userID }
+                    return owner.updatePlans(id: plans.id, usersID: filteredUserIDs)
+                }
+                
+                // 모든 update 작업이 완료될 때까지 기다린 후, 완료되면 Observable<Void> 반환
+                return Observable.merge(updateObservables).toArray().map { _ in }.asObservable()
+            }
+    }
+    
 }

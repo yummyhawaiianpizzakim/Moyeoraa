@@ -69,6 +69,21 @@ public final class FriendRepositoryImpl: FriendRepositoryProtocol {
         return self.fireBaseService.deleteDocument(collectionPaths: ["users", myID, "friends"], document: friendID)
             .asObservable()
     }
+    
+    public func deleteFriendsWhenDeleteUserInfo() -> Observable<Void> {
+        return self.fetchFriends()
+            .withUnretained(self)
+            .flatMap { owner, friends in
+                if friends.isEmpty {
+                    return Observable.just(())
+                }
+                
+                let deleteObservables = friends.map { friend in
+                    owner.deleteFriend(friendID: friend.id)
+                }
+                return Observable.merge(deleteObservables).toArray().map { _ in }.asObservable()
+            }
+    }
 }
 
 private extension FriendRepositoryImpl {

@@ -165,7 +165,7 @@ private extension MyPageFeature {
     private func showDropOutAlert() {
         let alert = MYRAlertController(
             title: "회원탈퇴",
-            message: "정말 탈퇴하시겠습니까?",
+            message: "정말 탈퇴하시겠습니까?\n 사용자와 관련된 정보는 삭제됩니다.",
             preferredStyle: .alert
         )
         let cancel = UIAlertAction(title: "취소", style: .cancel)

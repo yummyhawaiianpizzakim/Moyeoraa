@@ -491,4 +491,20 @@ public extension FireBaseServiceImpl {
             return Disposables.create()
         }
     }
+    
+    func deleteImage(imageString: String) -> Single<Void> {
+        return Single.create { single in
+            let imageName = imageString
+            let firebaseReference = Storage.storage().reference().child("\(imageName)")
+            
+            firebaseReference.delete { error in
+                guard let error else {
+                    single(.failure(FireStoreError.unknown))
+                    return
+                }
+                single(.success(()))
+            }
+            return Disposables.create()
+        }
+    }
 }

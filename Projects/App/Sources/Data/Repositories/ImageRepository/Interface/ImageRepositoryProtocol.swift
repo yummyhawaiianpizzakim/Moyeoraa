@@ -11,4 +11,6 @@ import RxSwift
 
 public protocol ImageRepositoryProtocol: AnyObject {
     func uploadImage(imageData: Data) -> Observable<String>
+    func deleteImage(imageString: String) -> Observable<Void> 
+    func deleteMyProfileImage() -> Observable<Void> 
 }

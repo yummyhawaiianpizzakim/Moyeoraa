@@ -22,4 +22,24 @@ public final class ImageRepositoryImpl: ImageRepositoryProtocol {
         self.fireBaseService.uploadImage(imageData: imageData)
             .asObservable()
     }
+    
+    public func deleteImage(imageString: String) -> Observable<Void> {
+        return self.fireBaseService.deleteImage(imageString: imageString)
+            .asObservable()
+    }
+    
+    public func deleteMyProfileImage() -> Observable<Void> {
+        guard let id = self.tokenManager.getToken(with: .userId)
+        else { return .error(TokenManagerError.notFound) }
+        
+        return self.fireBaseService.getDocument(collection: .users, document: id)
+            .asObservable()
+            .map { $0.toObject(UserDTO.self)?.toEntity() }
+            .compactMap { $0?.profileImage }
+            .withUnretained(self)
+            .flatMap { owner, imageString in
+                owner.deleteImage(imageString: imageString)
+            }
+            .catchAndReturn(())
+    }
 }

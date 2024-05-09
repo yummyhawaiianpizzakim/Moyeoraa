@@ -14,17 +14,22 @@ public final class DropOutUseCaseImpl: DropOutUseCaseProtocol {
     private let userRepository: UserRepositoryProtocol
     private let plansRepository: PlansRepositoryProtocol
     private let friendRepository: FriendRepositoryProtocol
+    private let imageRepository: ImageRepositoryProtocol
     
-    public init(authRepository: AuthRepositoryProtocol, userRepository: UserRepositoryProtocol, plansRepository: PlansRepositoryProtocol, friendRepository: FriendRepositoryProtocol) {
+    public init(authRepository: AuthRepositoryProtocol, userRepository: UserRepositoryProtocol, plansRepository: PlansRepositoryProtocol, friendRepository: FriendRepositoryProtocol, imageRepository: ImageRepositoryProtocol) {
         self.authRepository = authRepository
         self.userRepository = userRepository
         self.plansRepository = plansRepository
         self.friendRepository = friendRepository
+        self.imageRepository = imageRepository
     }
     
     public func dropOut() -> Observable<Void> {
-        return self.friendRepository.deleteFriendsWhenDeleteUserInfo()
-            .asObservable()
+        return self.imageRepository.deleteMyProfileImage()
+            .withUnretained(self)
+            .flatMap { owner, _ in
+                owner.friendRepository.deleteFriendsWhenDeleteUserInfo()
+            }
             .withUnretained(self)
             .flatMap({ owner, _ in
                 owner.userRepository.deleteUserInfo()

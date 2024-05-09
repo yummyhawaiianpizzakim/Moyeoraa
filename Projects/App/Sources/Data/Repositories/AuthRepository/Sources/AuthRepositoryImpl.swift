@@ -21,7 +21,7 @@ public final class AuthRepositoryImpl: AuthRepositoryProtocol {
     
     public func checkUser(uid: String) -> Single<Bool> {
         self.tokenManager.save(token: uid, with: .userId)
-        
+        print("checkUser(uid:: \(uid)")
         return self.firebaseService.getDocument(
             collection: .users,
             field: "id",

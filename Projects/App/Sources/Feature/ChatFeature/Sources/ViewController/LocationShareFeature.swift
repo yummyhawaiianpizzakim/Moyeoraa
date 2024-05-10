@@ -166,12 +166,12 @@ private extension LocationShareFeature {
         section.visibleItemsInvalidationHandler = { (items, offset, environment) in
             let containerWidth = environment.container.contentSize.width
             items.forEach { [weak self] item in
+                guard let self else { return }
                 let distanceFromCenter = abs((item.center.x - offset.x) - environment.container.contentSize.width / 2.0)
                 let scale = max(maximumZoomScale - (distanceFromCenter / containerWidth), minumumZoomScale)
                 item.transform = CGAffineTransform(scaleX: scale, y: scale)
                 if scale >= maximumZoomScale * 0.9 {
-                    self?.selectAnnotation(at: item.indexPath)
-                    print("self?.selectAnnotation(at:::: \(item.indexPath)")
+                    self.selectAnnotation(at: item.indexPath)
                 }
             }
         }
@@ -239,27 +239,43 @@ extension LocationShareFeature: MKMapViewDelegate {
         self.mapAnnotationView.coordinate = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lng)
     }
     
-    private func setUserAnnotations(_ annotations: [String: UserAnnotationView]) {
-        self.userAnnotationViews = annotations
-        for (_, annotation) in annotations {
-            self.mapView.addAnnotation(annotation)
+    private func setUserAnnotations(_ newAnnotations: [String: UserAnnotationView]) {
+        // 기존에 mapView에 추가된 모든 어노테이션을 가져옵니다.
+        let existingAnnotations = self.mapView.annotations.compactMap { $0 as? UserAnnotationView }
+        
+        // 기존 어노테이션 중 새 목록에 없는 어노테이션을 찾아 제거합니다.
+        for existingAnnotation in existingAnnotations {
+            if let userID = existingAnnotation.userID, newAnnotations[userID] == nil {
+                self.mapView.removeAnnotation(existingAnnotation)
+            }
         }
+        
+        // 새 어노테이션 목록을 순회하며 mapView에 추가합니다.
+        // 이때, 이미 추가된 어노테이션은 다시 추가하지 않습니다.
+        for (id, newAnnotation) in newAnnotations {
+            if existingAnnotations.contains(where: { annotation in
+                return annotation.userID == id
+            }) == false {
+                self.mapView.addAnnotation(newAnnotation)
+            }
+        }
+        
+        // 최신 어노테이션 목록을 업데이트합니다.
+        self.userAnnotationViews = newAnnotations
     }
+
     
     private func updateAnnotation(annotation: UserAnnotationView, lat: Double, lng: Double) {
         annotation.coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lng)
     }
     
     func selectAnnotation(at indexPath: IndexPath) {
-        
         guard let focusedUser = self.dataSource?.itemIdentifier(for: indexPath),
               let focusedAnnotation = self.userAnnotationViews[focusedUser.id]
         else { return }
         self.mapView.deselectAnnotation(focusedAnnotation, animated: true)
         self.mapView.selectAnnotation(focusedAnnotation, animated: true)
-        print("selectAnnotation::")
     }
-    
     
     func isArrivedAtPlans() -> Bool {
         guard let currentLocation = self.locationManager.location else { return false }
@@ -293,4 +309,5 @@ extension LocationShareFeature: MKMapViewDelegate {
         
         mapView.setCenter(annotation.coordinate, animated: true)
     }
+    
 }

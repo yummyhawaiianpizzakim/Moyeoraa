@@ -34,7 +34,7 @@ public final class UserAnnotationView: MKAnnotationView, MKAnnotation {
         super.prepareForReuse()
         self.userID = nil
         self.userImageURLString = nil
-        self.imageView.removeFromSuperview()
+        self.imageView.bindImage(urlString: "")
     }
     
     private func configureAttributes() {

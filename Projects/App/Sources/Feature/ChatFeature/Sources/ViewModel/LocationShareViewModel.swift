@@ -73,7 +73,6 @@ public final class LocationShareViewModel: BaseViewModel {
         
         let coordinate = plans.map { Coordinate(lat: $0.latitude, lng: $0.longitude) }
         
-//        let myCoordinate = input.myCoordinate.share()
         let myCoordinate = Observable.combineLatest(input.myCoordinate, input.isArrived).share()
         
         self.updateMyCoordinate(myCoordinate.take(1))
@@ -81,10 +80,14 @@ public final class LocationShareViewModel: BaseViewModel {
             .buffer(timeSpan: .seconds(10), count: .max, scheduler: ConcurrentMainScheduler.instance)
             .compactMap({ $0.last }))
         
-        let userAnnotations = Observable.combineLatest(sharedLocations, self.members.skip(1))
-            .take(1)
+        let sharedLocationsCountChanged = sharedLocations
+            .map { $0.count } // 세어로케이션스 배열의 갯수를 추출
+            .distinctUntilChanged()
+            .withLatestFrom(sharedLocations)
+        
+        let userAnnotations = Observable.combineLatest(sharedLocationsCountChanged, self.members.skip(1))
             .withUnretained(self)
-            .debug("userAnnotations")
+//            .debug("userAnnotations")
             .map({ owner, val in
                 let (sharedLocations, users) = val
                 return owner.generateAnnotations(sharedLocations: sharedLocations, users: users)
@@ -134,21 +137,30 @@ private extension LocationShareViewModel {
     }
     
     func generateAnnotations(sharedLocations: [SharedLocation], users: [User]) -> [String: UserAnnotationView] {
+        var latestSharedLocations: [String: SharedLocation] = [:]
         var result: [String: UserAnnotationView] = [:]
         
+        // 사용자별 최신 위치 정보 업데이트
         sharedLocations.forEach { sharedLocation in
-            users.forEach { user in
-                if sharedLocation.userID == user.id {
-                    let userAnnotationView = UserAnnotationView()
-                    userAnnotationView.userImageURLString = user.profileImage
-                    userAnnotationView.coordinate = .init(latitude: sharedLocation.latitude, longitude: sharedLocation.longitude)
-                    userAnnotationView.setUserID(id: user.id)
-                    result.updateValue(userAnnotationView, forKey: user.id)
-                }
+            latestSharedLocations[sharedLocation.userID] = sharedLocation
+        }
+        
+        // 최신 위치 정보를 바탕으로 어노테이션 생성
+        users.forEach { user in
+            if let sharedLocation = latestSharedLocations[user.id] {
+                let userAnnotationView = self.createUserAnnotationView(sharedLocation: sharedLocation, user: user)
+                result[user.id] = userAnnotationView
             }
         }
         
         return result
     }
     
+    func createUserAnnotationView(sharedLocation: SharedLocation, user: User) -> UserAnnotationView {
+        let userAnnotationView = UserAnnotationView()
+        userAnnotationView.userImageURLString = user.profileImage
+        userAnnotationView.coordinate = .init(latitude: sharedLocation.latitude, longitude: sharedLocation.longitude)
+        userAnnotationView.setUserID(id: user.id)
+        return userAnnotationView
+    }
 }

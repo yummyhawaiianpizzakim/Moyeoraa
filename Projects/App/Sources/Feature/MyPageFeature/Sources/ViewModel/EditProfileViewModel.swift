@@ -23,13 +23,16 @@ public final class EditProfileViewModel: BaseViewModel {
     private let fetchUserUseCase: FetchUserUseCaseProtocol
     private let updateUserUseCase: UpdateUserUseCaseProtocol
     private let uploadImageUseCase: UploadImageUseCaseProtocol
+    private let deleteImageUseCase: DeleteImageUseCaseProtocol
     
-    public init(fetchUserUseCase: FetchUserUseCaseProtocol,
-                updateUserUseCase: UpdateUserUseCaseProtocol,
-                uploadImageUseCase: UploadImageUseCaseProtocol) {
+    init(fetchUserUseCase: FetchUserUseCaseProtocol,
+         updateUserUseCase: UpdateUserUseCaseProtocol,
+         uploadImageUseCase: UploadImageUseCaseProtocol,
+         deleteImageUseCase: DeleteImageUseCaseProtocol) {
         self.fetchUserUseCase = fetchUserUseCase
         self.updateUserUseCase = updateUserUseCase
         self.uploadImageUseCase = uploadImageUseCase
+        self.deleteImageUseCase = deleteImageUseCase
     }
     
     public struct Input {
@@ -58,27 +61,27 @@ public final class EditProfileViewModel: BaseViewModel {
             })
             .disposed(by: self.disposeBag)
         
-        let editedProfile = Observable.combineLatest(input.name, input.profileImage).share()
+        let editedProfile = Observable.combineLatest(input.name, input.profileImage, user).share()
         
         let result = input.doneButtonDidTap
             .withLatestFrom(editedProfile)
             .withUnretained(self)
             .flatMapFirst { owner, val -> Observable<Void> in
                 guard let defaultName = owner.defaultName else { return .error(RxError.unknown) }
-                var (name, imageData) = val
+                var (name, imageData, oldUserInfo) = val
                 
                 if name.isEmpty || name == owner.defaultName {
                     name = defaultName
                 }
                 
-                return owner.updateUser(imageData: imageData, name: name)
+                return owner.updateUser(imageData: imageData, name: name, oldUserImageString: oldUserInfo.profileImage)
             }
             .share()
         
         let buttonEnabled = editedProfile
             .withUnretained(self)
             .map { owner, val in
-                let (name, imageData) = val
+                var (name, imageData, _) = val
                 return owner.isButtonEnabled(name: name, data: imageData)
             }
         
@@ -95,7 +98,11 @@ public final class EditProfileViewModel: BaseViewModel {
 }
 
 private extension EditProfileViewModel {
-    func updateUser(imageData: Data?, name: String) -> Observable<Void> {
+    func updateUser(imageData: Data?, name: String, oldUserImageString: String?) -> Observable<Void> {
+        self.deleteImageUseCase.delete(imageString: oldUserImageString)
+            .subscribe()
+            .disposed(by: self.disposeBag)
+        
         guard let imageData
         else { return self.updateUserUseCase
             .update(profileURL: nil, name: name)

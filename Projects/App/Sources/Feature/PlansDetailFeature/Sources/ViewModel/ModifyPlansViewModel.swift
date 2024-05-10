@@ -64,11 +64,8 @@ public final class ModifyPlansViewModel: BaseViewModel {
     }
     
     public func trnasform(input: Input) -> Output {
-        let plans = input.viewDidAppear
-            .withUnretained(self)
-            .flatMap { owner, _ in
-                owner.fetchPlansUseCase.fetch(id: owner.plansID)
-            }
+        let plans = self.fetchPlansUseCase
+            .fetch(id: self.plansID)
             .do { [weak self] plans in
                 self?.titleText.accept(plans.title)
                 self?.selectedDate.accept(plans.date)

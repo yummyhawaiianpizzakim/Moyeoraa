@@ -33,15 +33,12 @@ public final class MyPageCoordinator: CoordinatorProtocol {
         let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
         let plansRepository = PlansRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
         let friendRepository = FriendRepositoryImpl(fireBaseService: firebaseService, tokenManager: tokenManager)
+        let imageRepository = ImageRepositoryImpl(fireBaseService: firebaseService, tokenManager: tokenManager)
         
         let signOutUseCase = SignOutUseCaseImpl(authRepository: authRepository)
         let fetchUserUseCase = FetchUserUseCaseImpl(userRepository: userRepository)
         let updateNotificationUseCase = UpdateNotificationUseCaseSpy()
-        let dropOutUseCase = DropOutUseCaseImpl(authRepository: authRepository, userRepository: userRepository, plansRepository: plansRepository, friendRepository: friendRepository)
-        
-//        let fetchUserUseCase = FetchUserUseCaseSpy()
-//        let signOutUseCase = SignOutUseCaseSpy()
-//        let dropOutUseCase = DropOutUseCaseSpy()
+        let dropOutUseCase = DropOutUseCaseImpl(authRepository: authRepository, userRepository: userRepository, plansRepository: plansRepository, friendRepository: friendRepository, imageRepository: imageRepository)
         
         let vm = MyPageViewModel(
             fetchUserUseCase: fetchUserUseCase,

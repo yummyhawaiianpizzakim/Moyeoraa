@@ -45,6 +45,7 @@ public final class CreatePlansFeature: BaseFeature {
         let titleView = MYRNavigationView(title: "약속 만들기")
         self.setNavigationBar(isBackButton: true, titleView: titleView, rightButtonItem: nil)
         self.dataSource = self.generateDataSource()
+        self.view.backgroundColor = .white
     }
     public override func configureUI() {
         self.view.addSubview(self.scrollView)

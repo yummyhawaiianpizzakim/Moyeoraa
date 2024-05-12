@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 
 public struct ChatListViewModelActions {
-    public var showChatDetailFeature: (_ id: String, _ title: String) -> Void
+    public var showChatDetailFeature: (_ plansID: String, _ chatRoomID: String, _ title: String) -> Void
 }
 
 public final class ChatListViewModel: BaseViewModel {
@@ -54,7 +54,7 @@ public final class ChatListViewModel: BaseViewModel {
         //            .debug("cellDidSelect")
             .subscribe(with: self) { owner, chatList in
                 guard let chatList else { return }
-                owner.actions?.showChatDetailFeature(chatList.chatroomId, chatList.title)
+                owner.actions?.showChatDetailFeature(chatList.PlansId, chatList.chatroomId, chatList.title)
             }
             .disposed(by: self.disposeBag)
         

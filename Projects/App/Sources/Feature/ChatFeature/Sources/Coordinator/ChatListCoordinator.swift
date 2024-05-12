@@ -48,11 +48,12 @@ public final class ChatListCoordinator: CoordinatorProtocol {
         self.navigation.pushViewController(vc, animated: true)
     }
     
-    lazy var showChatDetailFeature: (_ id: String, _ title: String) -> Void = { id, title in
+    lazy var showChatDetailFeature: (_ plansID: String, _ chatRoomID: String, _ title: String) -> Void = { plansID, chatRoomID, title in
         let navigation = self.navigation
         let chatDetailCoordinator = ChatDetailCoordinator(
-            navigation: navigation,
-            chatRoomID: id,
+            navigation: navigation, 
+            plansID: plansID,
+            chatRoomID: chatRoomID,
             chatRoomTitle: title
         )
         chatDetailCoordinator.finishDelegate = self

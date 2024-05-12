@@ -67,8 +67,8 @@ public final class PlansDetailCoordinator: CoordinatorProtocol {
         self.navigation.pushViewController(vc, animated: true)
     }
     
-    private lazy var showChatRoomFeature: (_ id: String, _ title: String) -> Void = { id, title in
-        let coordinator = ChatDetailCoordinator(navigation: self.navigation, chatRoomID: id, chatRoomTitle: title)
+    private lazy var showChatRoomFeature: (_ plansID: String, _ chatRoomID: String, _ title: String) -> Void = { plansID, chatRoomID, title in
+        let coordinator = ChatDetailCoordinator(navigation: self.navigation, plansID: plansID, chatRoomID: chatRoomID, chatRoomTitle: title)
         self.childCoordinators.append(coordinator)
         coordinator.finishDelegate = self
         coordinator.start()
@@ -92,7 +92,10 @@ public final class PlansDetailCoordinator: CoordinatorProtocol {
 
 extension PlansDetailCoordinator: CoordinatorFinishDelegate {
     public func coordinatorDidFinished(childCoordinator: CoordinatorProtocol) {
-        
+        if childCoordinator.type == .chatDetail {
+            self.finish()
+            self.navigation.popViewController(animated: true)
+        }
     }
     
 }

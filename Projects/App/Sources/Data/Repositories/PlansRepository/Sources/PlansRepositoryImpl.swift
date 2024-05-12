@@ -115,6 +115,11 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
     }
     
     public func updatePlans(id: String, usersID: [String]) -> Observable<Void> {
+        guard let myID = self.tokenManager.getToken(with: .userId)
+        else { return .error(TokenManagerError.notFound)}
+        
+        var usersID = usersID.filter { $0 != myID }
+        
         var values: [String : Any] = [
             "usersID": usersID
         ]

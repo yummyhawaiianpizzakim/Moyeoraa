@@ -56,6 +56,8 @@ public final class HomeFeature: BaseFeature {
         return colView
     }()
     
+    private lazy var emptyView = MYREmptyView()
+    
     private lazy var createPlansButton: MYRIconButton = {
         let button = MYRIconButton(image: .Moyeora.plus,cornerRadius: MYRConstants.cornerRadiusMedium)
         return button
@@ -75,6 +77,8 @@ public final class HomeFeature: BaseFeature {
         let view = MYRNavigationView(title: "약속 일정")
         self.setNavigationBar(isBackButton: true, titleView: view, rightButtonItem: nil)
         self.dataSource = self.generateDataSource()
+        self.emptyView.type = .home
+        self.emptyView.isHidden = true
     }
    
     public override func configureUI() {
@@ -88,7 +92,8 @@ public final class HomeFeature: BaseFeature {
         }
         
         [self.contentView,
-         self.plansCollectionView
+         self.plansCollectionView,
+         self.emptyView
          ].forEach {
             self.containerView.addSubview($0)
         }
@@ -135,6 +140,13 @@ public final class HomeFeature: BaseFeature {
             make.bottom.equalToSuperview()
         }
         
+        self.emptyView.snp.makeConstraints { make in
+            make.top.equalTo(self.contentView.snp.bottom).offset(Metric.collViewTopPadding)
+            make.leading.equalTo(self.calendarView.snp.leading)
+            make.trailing.equalTo(self.calendarView.snp.trailing)
+            make.height.greaterThanOrEqualTo(126)
+        }
+        
         self.createPlansButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview().offset(Metric.plusButtonTrailingMargin)
             make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(Metric.plusButtonBottomMargin)
@@ -156,10 +168,16 @@ public final class HomeFeature: BaseFeature {
         let output = self.viewModel.trnasform(input: input)
         
         output.Plans.drive(with: self) { owner, plansArr in
+            if !plansArr.isEmpty {
+                owner.emptyView.isHidden = true
+            } else {
+                owner.emptyView.isHidden = false
+            }
+            
             let snap = owner.setSnapshot(plans: plansArr)
             owner.dataSource?.apply(snap)
-            owner.plansCollectionView.reloadData()
             owner.updateScrollViewContentSize()
+            owner.plansCollectionView.reloadData()
         }
         .disposed(by: self.disposeBag)
     }

@@ -17,12 +17,15 @@ public final class ChatDetailCoordinator: CoordinatorProtocol {
     
     public let navigation: UINavigationController
     
+    private let plansID: String
     private let chatRoomID: String
     private let chatRoomTitle: String
     
     public init(navigation: UINavigationController,
-         chatRoomID: String,
-         chatRoomTitle: String) {
+                plansID: String,
+                chatRoomID: String,
+                chatRoomTitle: String) {
+        self.plansID = plansID
         self.navigation = navigation
         self.chatRoomID = chatRoomID
         self.chatRoomTitle = chatRoomTitle
@@ -38,20 +41,29 @@ public final class ChatDetailCoordinator: CoordinatorProtocol {
         
         let chatRepository = ChatRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
         let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let plansRepository = PlansRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
         
         let observeChatUseCase = ObserveChatUseCaseImpl(chatRepository: chatRepository, userRepository: userRepository)
         let sendChatUseCase = SendChatUseCaseImpl(chatRepository: chatRepository)
         let updateIsCheckedUseCase = UpdateIsCheckedUseCaseImpl(chatRepository: chatRepository)
+        let exitChatRoomUseCase = ExitChatRoomUseCaseImpl(plansRepository: plansRepository)
         
         let vm = ChatDetailViewModel(
+            plansID: self.plansID,
             chatRoomID: self.chatRoomID,
             chatRoomTitle: self.chatRoomTitle,
             observeChatUseCase: observeChatUseCase,
             sendChatUseCase: sendChatUseCase,
-            updateIsCheckedUseCase: updateIsCheckedUseCase
+            updateIsCheckedUseCase: updateIsCheckedUseCase,
+            exitChatRoomUseCase: exitChatRoomUseCase
         )
         
-        vm.setAction(ChatDetailViewModelActions(showLocationShareFeature: showLocationShareFeature))
+        vm.setAction(
+            ChatDetailViewModelActions(
+                showLocationShareFeature: showLocationShareFeature,
+                showPlansDetailFeature: showPlansDetailFeature,
+                exitChatDetailFeature: exitChatDetailFeature)
+        )
         
         let vc = ChatDetailFeature(viewModel: vm)
         vc.hidesBottomBarWhenPushed = true
@@ -64,6 +76,23 @@ public final class ChatDetailCoordinator: CoordinatorProtocol {
         self.childCoordinators.append(coordinator)
         coordinator.finishDelegate = self
         coordinator.start()
+    }
+    
+    private lazy var showPlansDetailFeature: (_ id: String) -> Void = { id in
+        if self.navigation.viewControllers
+            .contains(where: { $0 is PlansDetailFeature }) {
+            self.navigation.popViewController(animated: true)
+        } else { 
+            let coordinator = PlansDetailCoordinator(navigation: self.navigation, plansID: id)
+            self.childCoordinators.append(coordinator)
+            coordinator.finishDelegate = self
+            coordinator.start()
+        }
+    }
+    
+    private lazy var exitChatDetailFeature: () -> Void = {
+        self.finish()
+        self.navigation.popViewController(animated: true)
     }
 }
 

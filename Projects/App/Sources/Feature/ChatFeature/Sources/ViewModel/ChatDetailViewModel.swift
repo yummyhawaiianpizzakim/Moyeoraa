@@ -11,12 +11,15 @@ import RxCocoa
 
 public struct ChatDetailViewModelActions {
     var showLocationShareFeature: (_ id: String) -> Void
+    var showPlansDetailFeature: (_ id: String) -> Void
+    var exitChatDetailFeature: () -> Void
 }
 
 public final class ChatDetailViewModel: BaseViewModel {
     public typealias Action = ChatDetailViewModelActions
     public let disposeBag = DisposeBag()
     public var actions: Action?
+    private let plansID: String
     private let chatRoomID: String
     public let chatRoomTitle: String
     public var chats: [Chat] = []
@@ -24,23 +27,29 @@ public final class ChatDetailViewModel: BaseViewModel {
     private let observeChatUseCase: ObserveChatUseCaseProtocol
     private let sendChatUseCase: SendChatUseCaseProtocol
     private let updateIsCheckedUseCase: UpdateIsCheckedUseCaseProtocol
+    private let exitChatRoomUseCase: ExitChatRoomUseCaseProtocol
     
-    public init(chatRoomID: String,
-         chatRoomTitle: String,
-         observeChatUseCase: ObserveChatUseCaseProtocol,
-         sendChatUseCase: SendChatUseCaseProtocol,
-                updateIsCheckedUseCase: UpdateIsCheckedUseCaseProtocol
+    public init(plansID: String,
+                chatRoomID: String,
+                chatRoomTitle: String,
+                observeChatUseCase: ObserveChatUseCaseProtocol,
+                sendChatUseCase: SendChatUseCaseProtocol,
+                updateIsCheckedUseCase: UpdateIsCheckedUseCaseProtocol,
+                exitChatRoomUseCase: ExitChatRoomUseCaseProtocol
     ) {
+        self.plansID = plansID
         self.chatRoomID = chatRoomID
         self.chatRoomTitle = chatRoomTitle
         self.observeChatUseCase = observeChatUseCase
         self.sendChatUseCase = sendChatUseCase
         self.updateIsCheckedUseCase = updateIsCheckedUseCase
+        self.exitChatRoomUseCase = exitChatRoomUseCase
     }
     
     public struct Input {
         let mapButtonDidTap: Observable<Void>
         let sendButtonDidTapWithText: Observable<String>
+        let chatRoomExitTrigger: Observable<Void>
     }
     
     public struct Output {
@@ -72,6 +81,16 @@ public final class ChatDetailViewModel: BaseViewModel {
             }
             .disposed(by: self.disposeBag)
         
+        input.chatRoomExitTrigger
+            .withUnretained(self)
+            .flatMap { owner, _ in
+                owner.exitChatRoomUseCase.exit(plansID: owner.plansID)
+            }
+            .subscribe(with: self) { owner, _ in
+                owner.actions?.exitChatDetailFeature()
+            }
+            .disposed(by: self.disposeBag)
+        
         return Output(chats: chats.asDriver(onErrorJustReturn: []))
     }
     
@@ -83,11 +102,15 @@ public final class ChatDetailViewModel: BaseViewModel {
 
 public extension ChatDetailViewModel {
     func hasMyChat(before index: Int) -> Bool {
-            guard
-                let prevChat = self.chats[safe: index - 1],
-                let currentChat = self.chats[safe: index]
-            else { return false }
-            
+        guard
+            let prevChat = self.chats[safe: index - 1],
+            let currentChat = self.chats[safe: index]
+        else { return false }
+        
         return prevChat.senderUserID == currentChat.senderUserID
-        }
+    }
+    
+    func showPlansDetailFeature() {
+        self.actions?.showPlansDetailFeature(self.plansID)
+    }
 }

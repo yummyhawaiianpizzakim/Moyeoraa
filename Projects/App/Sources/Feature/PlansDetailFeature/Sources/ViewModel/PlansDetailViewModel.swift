@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 
 public struct PlansDetailViewModelActions {
-    var showChatRoomFeature: (_ id: String, _ title: String) -> Void
+    var showChatRoomFeature: (_ plansID: String, _ chatRoomID: String, _ title: String) -> Void
     var showModifyPlansFeature: (_ id: String) -> Void
     var finishPlansDetailFeature: () -> Void
 }
@@ -77,7 +77,7 @@ public final class PlansDetailViewModel: BaseViewModel {
         input.enterChatButton
             .withLatestFrom(plans)
             .subscribe(with: self) { owner, plans in
-                owner.actions?.showChatRoomFeature(plans.chatRoomID, plans.title)
+                owner.actions?.showChatRoomFeature(plans.id, plans.chatRoomID, plans.title)
             }
             .disposed(by: self.disposeBag)
         

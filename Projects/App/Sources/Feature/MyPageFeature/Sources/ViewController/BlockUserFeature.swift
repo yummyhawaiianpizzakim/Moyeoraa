@@ -9,6 +9,7 @@
 import UIKit
 import RxSwift
 import RxCocoa
+import SnapKit
 
 public final class BlockUserFeature: BaseFeature {
     private let viewModel: BlockUserViewModel
@@ -28,6 +29,8 @@ public final class BlockUserFeature: BaseFeature {
         return view
     }()
     
+    private lazy var emptyView = MYREmptyView()
+    
     public init(viewModel: BlockUserViewModel) {
         self.viewModel = viewModel
         super.init()
@@ -38,12 +41,20 @@ public final class BlockUserFeature: BaseFeature {
         self.dataSource = self.generateDataSource()
         self.setNavigationBar(isBackButton: true, titleView: self.searchView, rightButtonItem: nil)
         self.view.backgroundColor = .white
+        self.emptyView.type = .block
+        self.emptyView.isHidden = true
     }
     
     public override func configureUI() {
-        [self.blockUserTableView].forEach { self.view.addSubview($0) }
+        [self.blockUserTableView, self.emptyView].forEach { self.view.addSubview($0) }
         
         self.blockUserTableView.snp.makeConstraints { make in
+            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(24)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalTo(self.view.safeAreaLayoutGuide)
+        }
+        
+        self.emptyView.snp.makeConstraints { make in
             make.top.equalTo(self.view.safeAreaLayoutGuide).offset(24)
             make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(self.view.safeAreaLayoutGuide)
@@ -102,6 +113,7 @@ public final class BlockUserFeature: BaseFeature {
         
         output.dataSource
         .drive(with: self) { owner, users in
+            owner.emptyView.bindEmptyView(isEmpty: users.isEmpty)
             owner.snapshot = owner.setSnapshot(dataSource: users)
             guard let snapshot = owner.snapshot else { return }
             owner.dataSource?.apply(snapshot)

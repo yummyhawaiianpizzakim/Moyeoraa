@@ -23,6 +23,8 @@ public final class ChatListFeature: BaseFeature {
         return view
     }()
     
+    private lazy var emptyView = MYREmptyView()
+    
     public init(viewModel: ChatListViewModel) {
         self.viewModel = viewModel
         super.init()
@@ -31,13 +33,20 @@ public final class ChatListFeature: BaseFeature {
     public override func configureAttributes() {
         let view = MYRNavigationView(title: "채팅 목록")
         self.setNavigationBar(isBackButton: true, titleView: view, rightButtonItem: nil)
+        self.emptyView.type = .chatList
+        self.emptyView.isHidden = true
     }
     
     public override func configureUI() {
-        [self.chatListTableView].forEach { self.view.addSubview($0)
+        [self.chatListTableView, self.emptyView].forEach { self.view.addSubview($0)
         }
         
         self.chatListTableView.snp.makeConstraints { make in
+            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(12)
+            make.leading.trailing.bottom.equalTo(self.view.safeAreaLayoutGuide)
+        }
+        
+        self.emptyView.snp.makeConstraints { make in
             make.top.equalTo(self.view.safeAreaLayoutGuide).offset(12)
             make.leading.trailing.bottom.equalTo(self.view.safeAreaLayoutGuide)
         }
@@ -58,9 +67,12 @@ public final class ChatListFeature: BaseFeature {
         
         output.ChatLists
             .drive(with: self) { owner, chatLists in
+                owner.emptyView.bindEmptyView(isEmpty: chatLists.isEmpty)
+                
                 owner.dataSource = owner.generateDataSource()
                 let snapshot = owner.setSnapshot(chatLists: chatLists)
                 owner.dataSource?.apply(snapshot)
+                owner.chatListTableView.reloadData()
             }
             .disposed(by: self.disposeBag)
     }

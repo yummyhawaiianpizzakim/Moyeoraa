@@ -37,6 +37,7 @@ public final class BlockUserFeature: BaseFeature {
     public override func configureAttributes() {
         self.dataSource = self.generateDataSource()
         self.setNavigationBar(isBackButton: true, titleView: self.searchView, rightButtonItem: nil)
+        self.view.backgroundColor = .white
     }
     
     public override func configureUI() {

@@ -168,7 +168,7 @@ public final class HomeFeature: BaseFeature {
         let output = self.viewModel.trnasform(input: input)
         
         output.Plans.drive(with: self) { owner, plansArr in
-            owner.bindEmptyView(isEmpty: plansArr.isEmpty)
+            owner.emptyView.bindEmptyView(isEmpty: plansArr.isEmpty)
             
             let snap = owner.setSnapshot(plans: plansArr)
             owner.dataSource?.apply(snap)
@@ -180,14 +180,6 @@ public final class HomeFeature: BaseFeature {
 }
 
 private extension HomeFeature {
-    func bindEmptyView(isEmpty: Bool) {
-        if !isEmpty {
-            self.emptyView.isHidden = true
-        } else {
-            self.emptyView.isHidden = false
-        }
-    }
-    
     func updateScrollViewContentSize() {
         let collectionViewHeight = self.plansCollectionView.contentSize.height
         let contentViewHeight = self.contentView.frame.height

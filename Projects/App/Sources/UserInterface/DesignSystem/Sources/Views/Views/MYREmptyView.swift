@@ -80,4 +80,12 @@ public extension MYREmptyView {
             }
         }
     }
+    
+    func bindEmptyView(isEmpty: Bool) {
+        if !isEmpty {
+            self.isHidden = true
+        } else {
+            self.isHidden = false
+        }
+    }
 }

@@ -67,7 +67,7 @@ public final class ChatListFeature: BaseFeature {
         
         output.ChatLists
             .drive(with: self) { owner, chatLists in
-                owner.bindEmptyView(isEmpty: chatLists.isEmpty)
+                owner.emptyView.bindEmptyView(isEmpty: chatLists.isEmpty)
                 
                 owner.dataSource = owner.generateDataSource()
                 let snapshot = owner.setSnapshot(chatLists: chatLists)
@@ -75,16 +75,6 @@ public final class ChatListFeature: BaseFeature {
                 owner.chatListTableView.reloadData()
             }
             .disposed(by: self.disposeBag)
-    }
-}
-
-private extension ChatListFeature {
-    func bindEmptyView(isEmpty: Bool) {
-        if !isEmpty {
-            self.emptyView.isHidden = true
-        } else {
-            self.emptyView.isHidden = false
-        }
     }
 }
 

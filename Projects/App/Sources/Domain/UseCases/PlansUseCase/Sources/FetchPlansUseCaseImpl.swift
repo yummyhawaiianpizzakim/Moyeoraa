@@ -31,5 +31,8 @@ public final class FetchPlansUseCaseImpl: FetchPlansUseCaseProtocol {
         self.plansRepository.fetchPlans(chatRoomID: chatRoomID)
     }
     
+    public func fetch() -> Observable<[Plans]> {
+        self.plansRepository.fetchPlansArr()
+    }
 }
 

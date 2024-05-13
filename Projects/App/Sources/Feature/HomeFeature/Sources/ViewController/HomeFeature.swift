@@ -167,7 +167,7 @@ public final class HomeFeature: BaseFeature {
         )
         let output = self.viewModel.trnasform(input: input)
         
-        output.Plans.drive(with: self) { owner, plansArr in
+        output.plansArrInDate.drive(with: self) { owner, plansArr in
             owner.emptyView.bindEmptyView(isEmpty: plansArr.isEmpty)
             
             let snap = owner.setSnapshot(plans: plansArr)
@@ -176,6 +176,13 @@ public final class HomeFeature: BaseFeature {
             owner.plansCollectionView.reloadData()
         }
         .disposed(by: self.disposeBag)
+        
+        output.plansArrIHad
+            .map({ $0.map { $0.date } })
+            .drive(with: self, onNext: { owner, dates in
+                owner.calendarView.bindCalendarView(plans: dates)
+            })
+            .disposed(by: self.disposeBag)
     }
 }
 

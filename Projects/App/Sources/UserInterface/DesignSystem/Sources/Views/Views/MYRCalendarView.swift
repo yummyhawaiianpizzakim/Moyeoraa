@@ -80,8 +80,26 @@ private extension MYRCalendarView {
 public extension MYRCalendarView {
     func bindCalendarView(plans: [Date]) {
         self.hadPlans = plans
+        self.reloadCalendarView()
     }
     
+    func reloadCalendarView() {
+        // hadPlans 배열에서 DateComponents 배열로 변환
+        let dict = Dictionary(grouping: self.hadPlans) { date in
+            date.toStringWithCustomFormat(.yearToDay)
+        }
+        
+        print("dict::: \(dict)") 
+        let components = dict.map { key, dates -> DateComponents in
+            guard let date = Date().stringToDate(dateString: key, type: .yearToDay)
+            else { return DateComponents() }
+            print("date::: \(date)")
+            return self.calendar.dateComponents([.year, .month, .day], from: date)
+        }
+        
+        // 변환된 DateComponents 배열을 사용하여 데코레이션 다시 로드 // 해당 날짜가 해셔블하지 아니하면 페이탈 에러
+        self.calendarView.reloadDecorations(forDateComponents: components, animated: true)
+    }
 }
 
 extension MYRCalendarView: UICalendarViewDelegate, UICalendarSelectionSingleDateDelegate {

@@ -94,6 +94,7 @@ public final class SelectMemberFeature: BaseFeature {
         self.friendsDataSource = self.generateFriendsDataSource()
         self.usersDataSource = self.generateUsersDataSource()
         self.tagDataSource = self.generateTagDataSource()
+        self.view.backgroundColor = .white
         self.usersEmptyView.type = .searchUser
         self.usersEmptyView.isHidden = false
         self.friendsEmptyView.type = .friend

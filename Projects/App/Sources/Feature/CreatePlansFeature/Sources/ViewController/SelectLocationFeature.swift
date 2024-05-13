@@ -40,6 +40,7 @@ public final class SelectLocationFeature: BaseFeature {
     public override func configureAttributes() {
         self.setNavigationBar(isBackButton: true, titleView: self.searchView, rightButtonItem: nil)
         self.dataSource = self.generateDataSource()
+        self.view.backgroundColor = .white
         self.emptyView.type = .searchLocation
         self.emptyView.isHidden = true
     }

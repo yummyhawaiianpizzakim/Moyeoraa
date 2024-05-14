@@ -137,7 +137,7 @@ public final class HomeFeature: BaseFeature {
             make.leading.equalTo(self.calendarView.snp.leading)
             make.trailing.equalTo(self.calendarView.snp.trailing)
             make.height.greaterThanOrEqualTo(300)
-            make.bottom.equalToSuperview()
+            make.bottom.equalToSuperview().offset(-56)
         }
         
         self.emptyView.snp.makeConstraints { make in
@@ -172,8 +172,8 @@ public final class HomeFeature: BaseFeature {
             
             let snap = owner.setSnapshot(plans: plansArr)
             owner.dataSource?.apply(snap)
-            owner.updateScrollViewContentSize()
             owner.plansCollectionView.reloadData()
+            owner.updateScrollViewContentSize()
         }
         .disposed(by: self.disposeBag)
         
@@ -190,13 +190,29 @@ private extension HomeFeature {
     func updateScrollViewContentSize() {
         let collectionViewHeight = self.plansCollectionView.contentSize.height
         let contentViewHeight = self.contentView.frame.height
-        // 24는 label과 plansCollectionView 패딩, 8은 calendarView 위 여백
+        // 24는 label과 plansCollectionView 패딩, 8은 calendarView 위 여백, 56은 콜렉션뷰 밑 마진
         let totalHeight = collectionViewHeight + contentViewHeight
-        + 24 + 8
-        
-        scrollView.contentSize = CGSize(width: scrollView.frame.width, height: totalHeight)
-        containerView.frame = CGRect(x: 0, y: 0, width: scrollView.frame.width, height: totalHeight)
-        
+        + 24 + 8 + 56
+        self.scrollView.contentSize = CGSize(width: self.scrollView.frame.width, height: totalHeight)
+        self.containerView.frame = CGRect(x: 0, y: 0, width: self.scrollView.frame.width, height: totalHeight)
+        self.configureCollectionView(collectionViewHeight)
+        self.configureContainerView(totalHeight)
+    }
+    
+    func configureCollectionView(_ height: CGFloat) {
+        self.plansCollectionView.snp.updateConstraints { make in
+            make.height.greaterThanOrEqualTo(height)
+            make.bottom.equalToSuperview().offset(-56)
+        }
+        self.plansCollectionView.reloadData()
+    }
+    
+    func configureContainerView(_ height: CGFloat) {
+        self.containerView.snp.updateConstraints { make in
+            make.height.greaterThanOrEqualTo(height)
+            make.bottom.equalToSuperview()
+        }
+        self.view.layoutIfNeeded()
     }
     
     func generateDataSource() -> UICollectionViewDiffableDataSource<Int, Plans> {

@@ -44,14 +44,14 @@ public final class HomeViewModel: BaseViewModel {
         let viewDidAppear = input.viewDidAppear.share()
         
         let plansArrIHad = viewDidAppear
-            .debug("plansArrIHad")
+//            .debug("plansArrIHad")
             .withUnretained(self)
             .flatMap { owner, _ -> Observable<[Plans]> in
                 owner.fetchPlansUseCase.fetch()
             }
         
         let plansArrInDate = Observable.combineLatest(plansArrIHad, selectedDate)
-            .debug("plansArrInDate")
+//            .debug("plansArrInDate")
             .withUnretained(self)
             .map { owner, val in
                 let (plansArr, date) = val

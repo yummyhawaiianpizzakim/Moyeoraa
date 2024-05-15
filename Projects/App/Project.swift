@@ -50,20 +50,6 @@ let targets: [Target] = [
             .Package.RxGesture,
             .Package.Kingfisher,
             .Package.SnapKit,
-            
-//            .SPM.Firebase,
-//            .SPM.FirebaseAuth,
-//            .SPM.FirebaseCore,
-//            .SPM.FirebaseStorage,
-//            .SPM.FirebaseDatabase,
-//            .SPM.FirebaseFirestore,
-//            .SPM.FirebaseMessaging,
-//            .SPM.RxSwift,
-//            .SPM.RxCocoa,
-//            .SPM.RxRelay,
-//            .SPM.RxGesture,
-//            .SPM.Kingfisher,
-//            .SPM.SnapKit,
         ],
         settings: .settings(base: env.baseSetting)
     )
@@ -74,7 +60,9 @@ let schemes: [Scheme] = [
         name: "\(env.name)-DEV",
         shared: true,
         buildAction: .buildAction(targets: ["\(env.name)"]),
-        runAction: .runAction(configuration: .dev),
+        runAction: .runAction(configuration: .dev, 
+                              executable: "\(env.name)",
+                              arguments: Arguments.arguments(environmentVariables: ["IDEPreferLogStreaming": "YES"])),
         archiveAction: .archiveAction(configuration: .dev),
         profileAction: .profileAction(configuration: .dev),
         analyzeAction: .analyzeAction(configuration: .dev)
@@ -83,7 +71,9 @@ let schemes: [Scheme] = [
         name: "\(env.name)-STAGE",
         shared: true,
         buildAction: .buildAction(targets: ["\(env.name)"]),
-        runAction: .runAction(configuration: .stage),
+        runAction: .runAction(configuration: .stage, 
+                              executable: "\(env.name)",
+                              arguments: Arguments.arguments(environmentVariables: ["IDEPreferLogStreaming": "YES"])),
         archiveAction: .archiveAction(configuration: .stage),
         profileAction: .profileAction(configuration: .stage),
         analyzeAction: .analyzeAction(configuration: .stage)
@@ -92,7 +82,9 @@ let schemes: [Scheme] = [
         name: "\(env.name)-PROD",
         shared: true,
         buildAction: .buildAction(targets: ["\(env.name)"]),
-        runAction: .runAction(configuration: .prod),
+        runAction: .runAction(configuration: .prod,
+                              executable: "\(env.name)",
+                              arguments: Arguments.arguments(environmentVariables: ["IDEPreferLogStreaming": "YES"])),
         archiveAction: .archiveAction(configuration: .prod),
         profileAction: .profileAction(configuration: .prod),
         analyzeAction: .analyzeAction(configuration: .prod)

@@ -58,7 +58,7 @@ public final class LocationShareFeature: BaseFeature {
     
     public override func configureAttributes() {
         self.mapView.delegate = self
-        self.setNavigationBar(isBackButton: true, titleView: self.naviTitleView, rightButtonItem: nil)
+        self.setNavigationBar(isBackButton: true, titleView: self.naviTitleView, rightButtonItem: nil, isSetTitleViewOnCenter: true)
         self.naviTitleView.backgroundColor = .clear
         self.dataSource = self.generateDataSource()
         self.locationManager.startUpdatingLocation()

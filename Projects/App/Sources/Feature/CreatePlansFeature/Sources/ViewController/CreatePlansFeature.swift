@@ -43,7 +43,7 @@ public final class CreatePlansFeature: BaseFeature {
     
     public override func configureAttributes() {
         let titleView = MYRNavigationView(title: "약속 만들기")
-        self.setNavigationBar(isBackButton: true, titleView: titleView, rightButtonItem: nil)
+        self.setNavigationBar(isBackButton: true, titleView: titleView, rightButtonItem: nil, isSetTitleViewOnCenter: true)
         self.dataSource = self.generateDataSource()
         self.view.backgroundColor = .white
     }

@@ -44,7 +44,7 @@ public final class SelectDateFeature: BaseFeature {
     public override func configureAttributes() {
         self.label.numberOfLines = 0
         self.dataSource = self.generateDataSource()
-        self.setNavigationBar(isBackButton: true, titleView: self.titleView, rightButtonItem: nil)
+        self.setNavigationBar(isBackButton: true, titleView: self.titleView, rightButtonItem: nil, isSetTitleViewOnCenter: true)
         self.view.backgroundColor = .white
     }
     

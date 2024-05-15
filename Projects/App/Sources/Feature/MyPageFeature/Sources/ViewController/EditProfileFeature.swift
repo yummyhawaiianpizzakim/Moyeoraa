@@ -54,7 +54,7 @@ public final class EditProfileFeature: BaseFeature {
     
     public override func configureAttributes() {
         self.nameTextField.delegate = self
-        self.setNavigationBar(isBackButton: true, titleView: self.titleView, rightButtonItem: nil)
+        self.setNavigationBar(isBackButton: true, titleView: self.titleView, rightButtonItem: nil, isSetTitleViewOnCenter: true)
         self.view.backgroundColor = .white
     }
     

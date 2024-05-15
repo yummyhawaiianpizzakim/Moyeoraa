@@ -66,7 +66,7 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
             .map { 
                 $0.compactMap { $0.toObject(PlansDTO.self)?.toEntity() }
             }
-            .debug("fetchPlansArr()")
+//            .debug("fetchPlansArr()")
     }
     
     public func fetchPlansArr(date: Date) -> Observable<[Plans]> {
@@ -76,7 +76,7 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
         let date = date.toStringWithCustomFormat(.yearToDay)
         
         return self.firebaseService.getDocument(collection: .plans, field: "date", fieldIn: "usersID", keyword: date, arrayContainsAny: [userID])
-            .debug("fetchPlansArr(date: ")
+//            .debug("fetchPlansArr(date: ")
             .map { $0.compactMap { $0.toObject(PlansDTO.self)?.toEntity() } }
             .asObservable()
     }

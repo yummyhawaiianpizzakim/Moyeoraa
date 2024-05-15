@@ -138,7 +138,7 @@ private extension MyPageViewModel {
     
     func generateDataSources(isOn: Bool) -> MyPageDataSource {
         let setting: [MyPageCellType] = [
-            .nofitication(isOn),
+//            .nofitication(isOn),
             .friends,
             .block,
             .signOut,

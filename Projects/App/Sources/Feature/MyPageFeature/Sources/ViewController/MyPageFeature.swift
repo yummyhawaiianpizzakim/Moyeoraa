@@ -50,6 +50,7 @@ public final class MyPageFeature: BaseFeature {
         view.delegate = self
         view.sectionIndexBackgroundColor = .systemBackground
         view.backgroundColor = .systemBackground
+        view.isScrollEnabled = false
         return view
     }()
     
@@ -184,17 +185,17 @@ extension MyPageFeature: UITableViewDelegate {
         return UITableViewDiffableDataSource<MyPageSection, MyPageCellType>(tableView: self.myPageTableView) { [weak self] tableView, indexPath, item in
             guard let self else { return UITableViewCell() }
             switch item {
-            case var .nofitication(isOn):
-                guard let cell = tableView.dequeueCell(MYRNotificationTVC.self, for: indexPath) else { return UITableViewCell() }
+//            case var .nofitication(isOn):
+//                guard let cell = tableView.dequeueCell(MYRNotificationTVC.self, for: indexPath) else { return UITableViewCell() }
+//                
+//                cell.bindSwitch(isOn)
+//                cell.isNotificationDidChange
+//                    .subscribe {
+//                        self.viewModel.updateNotification($0)
+//                    }
+//                    .disposed(by: self.disposeBag)
                 
-                cell.bindSwitch(isOn)
-                cell.isNotificationDidChange
-                    .subscribe {
-                        self.viewModel.updateNotification($0)
-                    }
-                    .disposed(by: self.disposeBag)
-                
-                return cell
+//                return cell
             case .friends:
                 guard let cell = tableView.dequeueCell(MYRMyPageTVC.self, for: indexPath) else { return UITableViewCell() }
                 cell.setCell(cellType: .leftRightIcon(title: "친구목록", left: .Moyeora.user, right: .Moyeora.chevronRight))

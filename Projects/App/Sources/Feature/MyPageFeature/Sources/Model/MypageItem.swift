@@ -25,7 +25,7 @@ enum MyPageSection: Int, CaseIterable, Hashable {
 }
 
 enum MyPageCellType: Hashable {
-    case nofitication(_ isOn: Bool)
+//    case nofitication(_ isOn: Bool)
     case friends
     case block
     case signOut

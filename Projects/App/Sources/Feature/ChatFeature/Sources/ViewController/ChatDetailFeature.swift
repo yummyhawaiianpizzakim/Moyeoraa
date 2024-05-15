@@ -86,6 +86,13 @@ public final class ChatDetailFeature: BaseFeature {
                 owner.dataSource?.apply(snapshot)
             }
             .disposed(by: self.disposeBag)
+        
+        output.toastTrigger
+            .drive(with: self) { owner, _ in
+                let toastView = MYRToastView(type: .failure, message: "위치 공유는 약속 당일에만 이용할 수 있습니다.", followsUndockedKeyboard: false)
+                toastView.show(in: self.view)
+            }
+            .disposed(by: self.disposeBag)
     }
 }
 

@@ -46,6 +46,7 @@ public final class ChatDetailCoordinator: CoordinatorProtocol {
         let observeChatUseCase = ObserveChatUseCaseImpl(chatRepository: chatRepository, userRepository: userRepository)
         let sendChatUseCase = SendChatUseCaseImpl(chatRepository: chatRepository)
         let updateIsCheckedUseCase = UpdateIsCheckedUseCaseImpl(chatRepository: chatRepository)
+        let checkLocationShareEnableUseCase = CheckLocationShareEnableUseCaseImpl(plansRepository: plansRepository)
         let exitChatRoomUseCase = ExitChatRoomUseCaseImpl(plansRepository: plansRepository)
         
         let vm = ChatDetailViewModel(
@@ -54,7 +55,8 @@ public final class ChatDetailCoordinator: CoordinatorProtocol {
             chatRoomTitle: self.chatRoomTitle,
             observeChatUseCase: observeChatUseCase,
             sendChatUseCase: sendChatUseCase,
-            updateIsCheckedUseCase: updateIsCheckedUseCase,
+            updateIsCheckedUseCase: updateIsCheckedUseCase, 
+            checkLocationShareEnableUseCase: checkLocationShareEnableUseCase,
             exitChatRoomUseCase: exitChatRoomUseCase
         )
         

@@ -66,6 +66,7 @@ public final class PlansRepositoryImpl: PlansRepositoryProtocol {
             .map { 
                 $0.compactMap { $0.toObject(PlansDTO.self)?.toEntity() }
             }
+            .debug("fetchPlansArr()")
     }
     
     public func fetchPlansArr(date: Date) -> Observable<[Plans]> {

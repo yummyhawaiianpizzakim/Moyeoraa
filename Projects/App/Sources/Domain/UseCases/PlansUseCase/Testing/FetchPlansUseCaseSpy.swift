@@ -37,6 +37,12 @@ public final class FetchPlansUseCaseSpy: FetchPlansUseCaseProtocol {
         
         return Observable.just(plans)
     }
+    
+    public func fetch() -> Observable<[Plans]> {
+        return Observable.just([])
+    }
+    
+    
 }
 
 private extension FetchPlansUseCaseSpy {

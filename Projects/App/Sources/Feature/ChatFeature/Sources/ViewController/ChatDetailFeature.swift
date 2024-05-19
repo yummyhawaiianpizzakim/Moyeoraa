@@ -89,8 +89,7 @@ public final class ChatDetailFeature: BaseFeature {
         
         output.toastTrigger
             .drive(with: self) { owner, _ in
-                let toastView = MYRToastView(type: .failure, message: "위치 공유는 약속 당일에만 이용할 수 있습니다.", followsUndockedKeyboard: false)
-                toastView.show(in: self.view)
+                owner.showLocationShareFailedAlert()
             }
             .disposed(by: self.disposeBag)
     }
@@ -160,6 +159,18 @@ private extension ChatDetailFeature {
         }
         
         alert.addActions([cancel, logout])
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
+    func showLocationShareFailedAlert() {
+        let alert = MYRAlertController(
+            title: "맴버 위치 공유",
+            message: "위치 공유는 약속 당일에만 이용할 수 있습니다.",
+            preferredStyle: .alert
+        )
+        let cancel = UIAlertAction(title: "확인", style: .cancel)
+        alert.addActions([cancel])
         
         present(alert, animated: true, completion: nil)
     }

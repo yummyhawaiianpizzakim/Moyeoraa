@@ -9,6 +9,7 @@
 import RxSwift
 
 public final class CreateBlockUseCaseSpy: CreateBlockUseCaseProtocol {
+
     public init() { }
     
     public func create(_ blockID: String) -> RxSwift.Observable<Void> {
@@ -16,5 +17,7 @@ public final class CreateBlockUseCaseSpy: CreateBlockUseCaseProtocol {
         return Observable.just(())
     }
     
-    
+    public func create(friendID: String, userID: String) -> Observable<Void> {
+        return Observable.just(())
+    }
 }

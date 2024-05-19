@@ -28,5 +28,6 @@ public extension UIImage {
         public static let plus = MoyeoraaAsset.Icons.plus.image
         public static let x = MoyeoraaAsset.Icons.x.image
         public static let moyeoraLogo = MoyeoraaAsset.Icons.moyeoraLogo.image
+        public static let pin = MoyeoraaAsset.Icons.pin.image
     }
 }

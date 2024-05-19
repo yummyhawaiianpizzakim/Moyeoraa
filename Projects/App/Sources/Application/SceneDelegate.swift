@@ -1,4 +1,5 @@
 import UIKit
+import RxSwift
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -8,13 +9,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: scene)
         self.window = window
+        if #available(iOS 13.0, *) {
+            self.window?.overrideUserInterfaceStyle = .light
+        }
         
         let nv = UINavigationController()
-        let coor = SignInCoordinator(navigation: nv)
+        let coor = AppCoordinator(navigation: nv)
         self.window?.rootViewController = nv
-        self.window?.backgroundColor = .white
+        self.window?.backgroundColor = .systemBackground
         coor.start()
         self.window?.makeKeyAndVisible()
+        
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {}

@@ -29,6 +29,11 @@ public final class ObserveChatListUseCaseSpy: ObserveChatListUseCaseProtocol {
            }
     }
     
+    public func observe() -> Observable<([ChatRoom], [Plans], [Chat])> {
+        return Observable.just(([], [], []))
+    }
+    
+    
     private func getChatRoom(userID: String) -> Observable<[ChatRoom]> {
         if "1234" == userID {
             let chatRoom1 = ChatRoom.stub(id: "qwer", userID: userID, plansID: "asdf")

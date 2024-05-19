@@ -36,10 +36,22 @@ public final class SelectMemberCoordinator: CoordinatorProtocol {
     }
     
     private func showSelectMemberFeature() {
-        let fetchFriendsUseCase = FetchFriendsUseCaseSpy()
-        let searchUserUseCase = SearchUserUseCaseSpy()
-        let createFriendUseCase = CreateFriendUseCaseSpy()
-        let deleteFriendUseCase = DeleteFriendUseCaseSpy()
+        let firebaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let friendRepository = FriendRepositoryImpl(fireBaseService: firebaseService, tokenManager: tokenManager)
+        
+        let fetchFriendsUseCase = FetchFriendsUseCaseImpl(friendRepository: friendRepository)
+        let searchUserUseCase = SearchUserUseCaseImpl(userRepository: userRepository)
+        let createFriendUseCase = CreateFriendUseCaseImpl(friendRepository: friendRepository, userRepository: userRepository)
+        let deleteFriendUseCase = DeleteFriendUseCaseImpl(userRepository: userRepository, friendRepository: friendRepository)
+        
+//        let fetchFriendsUseCase = FetchFriendsUseCaseSpy()
+//        let searchUserUseCase = SearchUserUseCaseSpy()
+        
+//        let createFriendUseCase = CreateFriendUseCaseSpy()
+//        let deleteFriendUseCase = DeleteFriendUseCaseSpy()
         
         let vm = SelectMemberViewModel(
             fetchFriendsUseCase: fetchFriendsUseCase,

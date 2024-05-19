@@ -30,15 +30,28 @@ public final class PlansDetailCoordinator: CoordinatorProtocol {
     }
     
     private func showPlansDetailFeature() {
-        let fetchPlansUseCase = FetchPlansUseCaseSpy()
-        let fetchUserUseCase = FetchUserUseCaseSpy()
-        let deletePlansUseCase = DeletePlansUseCaseSpy()
+        let firebaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let plansRepository = PlansRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let chatRepository = ChatRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        
+        let fetchPlansUseCase = FetchPlansUseCaseImpl(plansRepository: plansRepository)
+        let fetchUserUseCase = FetchUserUseCaseImpl(userRepository: userRepository)
+        let deletePlansUseCase = DeletePlansUseCaseImpl(plansRepository: plansRepository)
+        let deleteChatRoomUseCase = DeleteChatRoomUseCaseImpl(chatRepository: chatRepository)
+        
+//        let fetchPlansUseCase = FetchPlansUseCaseSpy()
+//        let fetchUserUseCase = FetchUserUseCaseSpy()
+//        let deletePlansUseCase = DeletePlansUseCaseSpy()
         
         let vm = PlansDetailViewModel(
             plansID: self.plansID,
             fetchPlansUseCase: fetchPlansUseCase,
             fetchUserUseCase: fetchUserUseCase,
-            deletePlansUseCase: deletePlansUseCase)
+            deletePlansUseCase: deletePlansUseCase, 
+            deleteChatRoomUseCase: deleteChatRoomUseCase)
         
         vm.setAction(
             PlansDetailViewModelActions(
@@ -47,13 +60,15 @@ public final class PlansDetailCoordinator: CoordinatorProtocol {
                 finishPlansDetailFeature: finishPlansDetailFeature
             )
         )
+        
         let vc = PlansDetailFeature(viewModel: vm)
+        vc.hidesBottomBarWhenPushed = true
         
         self.navigation.pushViewController(vc, animated: true)
     }
     
-    private lazy var showChatRoomFeature: (_ id: String, _ title: String) -> Void = { id, title in
-        let coordinator = ChatDetailCoordinator(navigation: self.navigation, chatRoomID: id, chatRoomTitle: title)
+    private lazy var showChatRoomFeature: (_ plansID: String, _ chatRoomID: String, _ title: String) -> Void = { plansID, chatRoomID, title in
+        let coordinator = ChatDetailCoordinator(navigation: self.navigation, plansID: plansID, chatRoomID: chatRoomID, chatRoomTitle: title)
         self.childCoordinators.append(coordinator)
         coordinator.finishDelegate = self
         coordinator.start()
@@ -77,7 +92,10 @@ public final class PlansDetailCoordinator: CoordinatorProtocol {
 
 extension PlansDetailCoordinator: CoordinatorFinishDelegate {
     public func coordinatorDidFinished(childCoordinator: CoordinatorProtocol) {
-        
+        if childCoordinator.type == .chatDetail {
+            self.finish()
+            self.navigation.popViewController(animated: true)
+        }
     }
     
 }

@@ -27,7 +27,13 @@ public final class HomeCoordinator: CoordinatorProtocol {
     }
     
     private func showHomeFeature() {
-        let fetchPlansUseCase = FetchPlansUseCaseSpy()
+        let firebaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let plansRepository = PlansRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let fetchPlansUseCase = FetchPlansUseCaseImpl(plansRepository: plansRepository)
+        
+//        let fetchPlansUseCase = FetchPlansUseCaseSpy()
         
         let vm = HomeViewModel(
             fetchPlansUseCase: fetchPlansUseCase

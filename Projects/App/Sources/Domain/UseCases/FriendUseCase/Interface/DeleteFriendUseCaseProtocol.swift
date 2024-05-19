@@ -10,4 +10,5 @@ import RxSwift
 
 public protocol DeleteFriendUseCaseProtocol: AnyObject {
     func delete(_ id: String) -> Observable<Void>
+    func delete(friendID: String) -> Observable<Void> 
 }

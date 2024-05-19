@@ -8,6 +8,7 @@
 
 import UIKit
 import RxSwift
+import SnapKit
 
 public final class SelectMemberFeature: BaseFeature {
     public let viewModel: SelectMemberViewModel
@@ -62,6 +63,8 @@ public final class SelectMemberFeature: BaseFeature {
         return view
     }()
 
+    private lazy var friendsEmptyView = MYREmptyView()
+    
     private lazy var usersTableView: UITableView = {
         let view = UITableView()
         view.register(SelectMemberSearchUsersTVC.self)
@@ -69,6 +72,8 @@ public final class SelectMemberFeature: BaseFeature {
         view.delegate = self
         return view
     }()
+
+    private lazy var usersEmptyView = MYREmptyView()
 
     private lazy var tagCollectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: self.createLayout())
@@ -89,6 +94,11 @@ public final class SelectMemberFeature: BaseFeature {
         self.friendsDataSource = self.generateFriendsDataSource()
         self.usersDataSource = self.generateUsersDataSource()
         self.tagDataSource = self.generateTagDataSource()
+        self.view.backgroundColor = .white
+        self.usersEmptyView.type = .searchUser
+        self.usersEmptyView.isHidden = false
+        self.friendsEmptyView.type = .friend
+        self.friendsEmptyView.isHidden = true
     }
 
     public override func configureUI() {
@@ -98,10 +108,13 @@ public final class SelectMemberFeature: BaseFeature {
          self.doneButton
         ]
             .forEach { self.view.addSubview($0) }
-
-        self.vc1.view.addSubview(self.friendsTableView)
-        self.vc2.view.addSubview(self.usersTableView)
-
+        
+        [self.friendsTableView, self.friendsEmptyView].forEach { self.vc1.view.addSubview($0)
+        }
+        
+        [self.usersTableView, self.usersEmptyView].forEach { self.vc2.view.addSubview($0)
+        }
+        
         self.segmentedControl.snp.makeConstraints { make in
             make.top.equalTo(self.view.safeAreaLayoutGuide)
             make.leading.trailing.equalToSuperview()
@@ -113,12 +126,20 @@ public final class SelectMemberFeature: BaseFeature {
             make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(self.tagCollectionView.snp.top).offset(12)
         }
-
+        
         self.friendsTableView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        self.friendsEmptyView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
 
         self.usersTableView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        self.usersEmptyView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
 
@@ -188,25 +209,29 @@ public final class SelectMemberFeature: BaseFeature {
         )
 
         let output = self.viewModel.trnasform(input: input)
-
+        
         output.friends
 //            .debug("friends")
             .drive(with: self) { owner, friends in
-            let snapshot = owner.setFriendsSnapshot(friends: friends)
-            owner.friendsSnapshot = snapshot
-            owner.friendsDataSource?.apply(snapshot)
-        }
-        .disposed(by: self.disposeBag)
-
+                owner.friendsEmptyView.bindEmptyView(isEmpty: friends.isEmpty)
+                let snapshot = owner.setFriendsSnapshot(friends: friends)
+                owner.friendsSnapshot = snapshot
+                owner.friendsDataSource?.apply(snapshot)
+                owner.friendsTableView.reloadData()
+            }
+            .disposed(by: self.disposeBag)
+        
         output.users
 //            .debug("users")
             .drive(with: self) { owner, users in
-            let snapshot = owner.setUsersSnapshot(users: users)
-            owner.usersSnapshot = snapshot
-            owner.usersDataSource?.apply(snapshot)
-        }
-        .disposed(by: self.disposeBag)
-
+                owner.usersEmptyView.bindEmptyView(isEmpty: users.isEmpty)
+                let snapshot = owner.setUsersSnapshot(users: users)
+                owner.usersSnapshot = snapshot
+                owner.usersDataSource?.apply(snapshot)
+                owner.usersTableView.reloadData()
+            }
+            .disposed(by: self.disposeBag)
+        
         output.tags.drive(with: self) { owner, users in
             let snapshot = owner.setTagSnapshot(dataSource: users)
             owner.tagDataSource?.apply(snapshot)
@@ -279,7 +304,9 @@ extension SelectMemberFeature: UITableViewDelegate {
                   let searchUserCell = tableView.dequeueCell(SelectMemberSearchUsersTVC.self, for: indexPath)
             else { return UITableViewCell() }
             searchUserCell.bindCell(profileURL: item.profileImage ?? "", userName: item.name, userTag: item.tagNumber)
-
+            let isFriend = self.checkFriend(indexPath: indexPath)
+            searchUserCell.isPlusButtonSelected = isFriend
+            
             searchUserCell.plusButton.rx.tap
                 .throttle(.seconds(1), scheduler: MainScheduler.instance)
                 .compactMap { _ in
@@ -299,6 +326,23 @@ extension SelectMemberFeature: UITableViewDelegate {
 
             return searchUserCell
         }
+    }
+    
+    private func checkFriend(indexPath: IndexPath) -> Bool {
+        guard let friends = self.friendsSnapshot?.itemIdentifiers,
+              let user = self.usersDataSource?.itemIdentifier(for: indexPath)
+        else {
+            return false
+        }
+        let friendsDict = Dictionary(uniqueKeysWithValues: friends.map { ($0.userID, $0) } )
+        
+        for (id, _) in friendsDict {
+            if user.id == id {
+                return true
+            }
+        }
+        
+        return false
     }
 
     private func setFriendsSnapshot(friends: [Friend]) -> NSDiffableDataSourceSnapshot<Int, Friend> {

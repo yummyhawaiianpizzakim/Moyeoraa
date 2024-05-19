@@ -10,5 +10,5 @@ import Foundation
 import RxSwift
 
 public protocol ObserveChatListUseCaseProtocol {
-    func observe() -> Observable<([ChatRoom], [Plans])>
+    func observe() -> Observable<([ChatRoom], [Plans], [Chat])>
 }

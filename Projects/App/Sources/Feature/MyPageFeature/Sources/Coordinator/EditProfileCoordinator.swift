@@ -29,18 +29,30 @@ public final class EditProfileCoordinator: CoordinatorProtocol {
     }
     
     private func showEditProfileFeature() {
-        let fetchUserUseCase = FetchUserUseCaseSpy()
-        let updateUserUseCase = UpdateUserUseCaseSpy()
-        let uploadImageUseCase = UploadImageUseCaseSpy()
+        let fireBaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let imageRepository = ImageRepositoryImpl(fireBaseService: fireBaseService, tokenManager: tokenManager)
+        let userRepository = UserRepositoryImpl(firebaseService: fireBaseService, tokenManager: tokenManager)
+        
+        let fetchUserUseCase = FetchUserUseCaseImpl(userRepository: userRepository)
+        let updateUserUseCase = UpdateUserUseCaseImpl(userRepository: userRepository)
+        let uploadImageUseCase = UploadImageUseCaseImpl(imageRepository: imageRepository)
+        let deleteImageUseCase = DeleteImageUseCaseImpl(imageRepository: imageRepository)
+//        let fetchUserUseCase = FetchUserUseCaseSpy()
+//        let updateUserUseCase = UpdateUserUseCaseSpy()
+//        let uploadImageUseCase = UploadImageUseCaseSpy()
         let vm = EditProfileViewModel(
             fetchUserUseCase: fetchUserUseCase,
             updateUserUseCase: updateUserUseCase,
-            uploadImageUseCase: uploadImageUseCase
+            uploadImageUseCase: uploadImageUseCase, 
+            deleteImageUseCase: deleteImageUseCase
         )
         
         vm.setAction(EditProfileViewModelActions(finishEditProfileFeature: finishEditProfileFeature))
         
         let vc = EditProfileFeature(viewModel: vm)
+        vc.hidesBottomBarWhenPushed = true
         
         self.navigation.pushViewController(vc, animated: true)
     }

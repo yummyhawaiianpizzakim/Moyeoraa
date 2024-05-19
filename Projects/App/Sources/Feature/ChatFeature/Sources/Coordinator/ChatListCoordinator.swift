@@ -26,8 +26,18 @@ public final class ChatListCoordinator: CoordinatorProtocol {
     }
     
     private func showChatListFeature() {
-        let uc = ObserveChatListUseCaseSpy()
-        let vm = ChatListViewModel(fetchChatUseCase: uc)
+//        let uc = ObserveChatListUseCaseSpy()
+        
+        let firebaseService = FireBaseServiceImpl.shared
+        let tokenManager = KeychainTokenManager.shared
+        
+        let plansRepository = PlansRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let chatRepository =  ChatRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        
+        let fetchChatUseCase = ObserveChatListUseCaseImpl(chatRepository: chatRepository, plansRepository: plansRepository)
+        
+        let vm = ChatListViewModel(fetchChatUseCase: fetchChatUseCase)
+        
         let vc = ChatListFeature(viewModel: vm)
         vm.setAction(
             ChatListViewModelActions(
@@ -38,11 +48,12 @@ public final class ChatListCoordinator: CoordinatorProtocol {
         self.navigation.pushViewController(vc, animated: true)
     }
     
-    lazy var showChatDetailFeature: (_ id: String, _ title: String) -> Void = { id, title in
+    lazy var showChatDetailFeature: (_ plansID: String, _ chatRoomID: String, _ title: String) -> Void = { plansID, chatRoomID, title in
         let navigation = self.navigation
         let chatDetailCoordinator = ChatDetailCoordinator(
-            navigation: navigation,
-            chatRoomID: id,
+            navigation: navigation, 
+            plansID: plansID,
+            chatRoomID: chatRoomID,
             chatRoomTitle: title
         )
         chatDetailCoordinator.finishDelegate = self

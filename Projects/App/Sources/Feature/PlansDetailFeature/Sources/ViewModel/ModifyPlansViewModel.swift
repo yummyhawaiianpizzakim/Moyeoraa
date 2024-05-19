@@ -24,6 +24,7 @@ public final class ModifyPlansViewModel: BaseViewModel {
     public var actions: Action?
     
     private let plansID: String
+    private var makingUserID: String?
     public let titleText = BehaviorRelay<String>(value: "")
     public let selectedDate = BehaviorRelay<Date?>(value: nil)
     public let selectedLocation = BehaviorRelay<Address?>(value: nil)
@@ -32,19 +33,24 @@ public final class ModifyPlansViewModel: BaseViewModel {
     private let updatePlansUseCase: UpdatePlansUseCaseProtocol
     private let fetchPlansUseCase: FetchPlansUseCaseProtocol
     private let fetchUserUseCase: FetchUserUseCaseProtocol
+    private let kickOutUserUseCase: KickOutUserUseCaseProtocol
     
     public init(
         plansID: String,
         updatePlansUseCase: UpdatePlansUseCaseProtocol,
         fetchPlansUseCase: FetchPlansUseCaseProtocol,
-        fetchUserUseCase: FetchUserUseCaseProtocol) {
+        fetchUserUseCase: FetchUserUseCaseProtocol,
+        kickOutUserUseCase: KickOutUserUseCaseProtocol
+    ) {
         self.plansID = plansID
         self.updatePlansUseCase = updatePlansUseCase
         self.fetchPlansUseCase = fetchPlansUseCase
         self.fetchUserUseCase = fetchUserUseCase
+        self.kickOutUserUseCase = kickOutUserUseCase
     }
     
     public struct Input {
+        let viewDidAppear: Observable<Void>
         let titleText: Observable<String>
         let dateButtonDidTap: Observable<Void>
         let locationButtonDidTap: Observable<Void>
@@ -58,12 +64,14 @@ public final class ModifyPlansViewModel: BaseViewModel {
     }
     
     public func trnasform(input: Input) -> Output {
-        let plans = self.fetchPlansUseCase.fetch(id: self.plansID)
+        let plans = self.fetchPlansUseCase
+            .fetch(id: self.plansID)
             .do { [weak self] plans in
                 self?.titleText.accept(plans.title)
                 self?.selectedDate.accept(plans.date)
                 let address = self?.makeAddress(plans: plans)
                 self?.selectedLocation.accept(address)
+                self?.makingUserID = plans.makingUserID
             }
             .share()
         
@@ -115,8 +123,10 @@ public final class ModifyPlansViewModel: BaseViewModel {
                 let (title, date, location, members) = val
                 guard let date, let location
                 else { return Observable.just(()) }
+                
                 return owner.updatePlansUseCase
-                    .update(title: title,
+                    .update(id: owner.plansID,
+                            title: title,
                             date: date,
                             location: location,
                             members: members)
@@ -138,39 +148,21 @@ public final class ModifyPlansViewModel: BaseViewModel {
                 oldUser.id != user.id
             }
         
-        self.selectedMembers.accept(tagedUsersValue)
+        self.kickOutUserUseCase.kickOut(plansID: self.plansID, usersID: tagedUsersValue.map({ $0.id }))
+            .subscribe(with: self) { owner, _ in
+                owner.selectedMembers.accept(tagedUsersValue)
+            }
+            .disposed(by: self.disposeBag)
+    }
+    
+    public func isMyself(id: String) -> Bool {
+        self.makingUserID == id
     }
 }
 
 private extension ModifyPlansViewModel {
-    func getUsers() -> [User] {
-        let user1 = User(id: "qwer", name: "qqqq", tagNumber: 1234, fcmToken: "", isNotification: false)
-        
-        let user2 = User(id: "asdf", name: "wwww", tagNumber: 5678, fcmToken: "", isNotification: false)
-        
-        let user3 = User(id: "zxcv", name: "eeee", tagNumber: 1357, fcmToken: "", isNotification: false)
-        
-        let user4 = User(id: "5687", name: "zmxncbv", tagNumber: 1876, fcmToken: "", isNotification: false)
-        
-        let user5 = User(id: "1237", name: "zzqpoweif", tagNumber: 1658, fcmToken: "", isNotification: false)
-        
-        let user6 = User(id: "1457", name: "eeee", tagNumber: 1346, fcmToken: "", isNotification: false)
-        
-        let user7 = User(id: "4839", name: "eeee", tagNumber: 0493, fcmToken: "", isNotification: false)
-        
-        let user8 = User(id: "1928", name: "eeee", tagNumber: 0135, fcmToken: "", isNotification: false)
-        
-        let user9 = User(id: "4532", name: "eeee", tagNumber: 7642, fcmToken: "", isNotification: false)
-        
-        return [user1, user2, user3, user4, user5, user6,
-                user7, user8, user9
-        ]
-    }
-    
     func makeAddress(plans: Plans) -> Address {
-        
-        
-        return Address(id: plans.id, name: plans.location, address: plans.location, lat: plans.latitude, lng: plans.longitude)
+        return Address(name: plans.location, address: plans.location, lat: plans.latitude, lng: plans.longitude)
     }
 }
 

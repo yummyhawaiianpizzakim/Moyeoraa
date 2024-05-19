@@ -8,6 +8,7 @@
 
 import UIKit
 import RxSwift
+import SnapKit
 
 public final class SelectLocationFeature: BaseFeature {
     public let viewModel: SelectLocationViewModel
@@ -27,6 +28,8 @@ public final class SelectLocationFeature: BaseFeature {
         return view
     }()
     
+    private lazy var emptyView = MYREmptyView()
+    
     private lazy var doneButton = MYRTextButton("선택 완료", textColor: .neutral(.balck), font: .subtitle1, backgroundColor: .primary(.primary2), cornerRadius: 16)
     
     public init(viewModel: SelectLocationViewModel) {
@@ -37,13 +40,22 @@ public final class SelectLocationFeature: BaseFeature {
     public override func configureAttributes() {
         self.setNavigationBar(isBackButton: true, titleView: self.searchView, rightButtonItem: nil)
         self.dataSource = self.generateDataSource()
+        self.view.backgroundColor = .white
+        self.emptyView.type = .searchLocation
+        self.emptyView.isHidden = true
     }
     
     public override func configureUI() {
-        [self.locationTableView, self.doneButton]
+        [self.locationTableView, self.emptyView, self.doneButton]
             .forEach { self.view.addSubview($0) }
         
         self.locationTableView.snp.makeConstraints { make in
+            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(12)
+            make.horizontalEdges.equalToSuperview()
+            make.bottom.equalTo(self.doneButton.snp.top).offset(12)
+        }
+        
+        self.emptyView.snp.makeConstraints { make in
             make.top.equalTo(self.view.safeAreaLayoutGuide).offset(12)
             make.horizontalEdges.equalToSuperview()
             make.bottom.equalTo(self.doneButton.snp.top).offset(12)
@@ -72,6 +84,8 @@ public final class SelectLocationFeature: BaseFeature {
         
         output.addresses
             .drive(with: self) { owner, addresses in
+                owner.emptyView.bindEmptyView(isEmpty: addresses.isEmpty)
+                
                 let snapshot = owner.setSnapshot(addresses: addresses)
                 owner.dataSource?.apply(snapshot)
             }

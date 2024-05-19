@@ -59,6 +59,6 @@ private extension MYRTimeCell {
 public extension MYRTimeCell {
     
     func bindCell(with date: Date) {
-        self.timeLabel.text = date.toStringWithCustomFormat("HH:mm")
+        self.timeLabel.text = date.toStringWithCustomFormat(.hourAndMinute)
     }
 }

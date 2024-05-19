@@ -15,6 +15,8 @@ public final class MyPageFeature: BaseFeature {
     
     private var dataSource: UITableViewDiffableDataSource<MyPageSection, MyPageCellType>?
     
+    private lazy var titleView = MYRNavigationView(title: "마이페이지")
+    
     private lazy var profileView = MYRIconView(size: .custom(.init(width: 72, height: 72)), isCircle: true)
     
     private lazy var labelsStackView: UIStackView = {
@@ -48,6 +50,7 @@ public final class MyPageFeature: BaseFeature {
         view.delegate = self
         view.sectionIndexBackgroundColor = .systemBackground
         view.backgroundColor = .systemBackground
+        view.isScrollEnabled = false
         return view
     }()
     
@@ -58,6 +61,8 @@ public final class MyPageFeature: BaseFeature {
     
     public override func configureAttributes() {
         self.dataSource = self.generateDataSource()
+        self.setNavigationBar(titleView: self.titleView, rightButtonItem: nil)
+        self.view.backgroundColor = .white
     }
     
     public override func configureUI() {
@@ -161,7 +166,7 @@ private extension MyPageFeature {
     private func showDropOutAlert() {
         let alert = MYRAlertController(
             title: "회원탈퇴",
-            message: "정말 탈퇴하시겠습니까?",
+            message: "정말 탈퇴하시겠습니까?\n 사용자와 관련된 정보는 삭제됩니다.",
             preferredStyle: .alert
         )
         let cancel = UIAlertAction(title: "취소", style: .cancel)
@@ -180,17 +185,17 @@ extension MyPageFeature: UITableViewDelegate {
         return UITableViewDiffableDataSource<MyPageSection, MyPageCellType>(tableView: self.myPageTableView) { [weak self] tableView, indexPath, item in
             guard let self else { return UITableViewCell() }
             switch item {
-            case var .nofitication(isOn):
-                guard let cell = tableView.dequeueCell(MYRNotificationTVC.self, for: indexPath) else { return UITableViewCell() }
+//            case var .nofitication(isOn):
+//                guard let cell = tableView.dequeueCell(MYRNotificationTVC.self, for: indexPath) else { return UITableViewCell() }
+//                
+//                cell.bindSwitch(isOn)
+//                cell.isNotificationDidChange
+//                    .subscribe {
+//                        self.viewModel.updateNotification($0)
+//                    }
+//                    .disposed(by: self.disposeBag)
                 
-                cell.bindSwitch(isOn)
-                cell.isNotificationDidChange
-                    .subscribe {
-                        self.viewModel.updateNotification($0)
-                    }
-                    .disposed(by: self.disposeBag)
-                
-                return cell
+//                return cell
             case .friends:
                 guard let cell = tableView.dequeueCell(MYRMyPageTVC.self, for: indexPath) else { return UITableViewCell() }
                 cell.setCell(cellType: .leftRightIcon(title: "친구목록", left: .Moyeora.user, right: .Moyeora.chevronRight))

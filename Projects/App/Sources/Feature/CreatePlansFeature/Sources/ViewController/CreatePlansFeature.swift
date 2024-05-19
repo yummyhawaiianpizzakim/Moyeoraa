@@ -43,8 +43,9 @@ public final class CreatePlansFeature: BaseFeature {
     
     public override func configureAttributes() {
         let titleView = MYRNavigationView(title: "약속 만들기")
-        self.setNavigationBar(isBackButton: true, titleView: titleView, rightButtonItem: nil)
+        self.setNavigationBar(isBackButton: true, titleView: titleView, rightButtonItem: nil, isSetTitleViewOnCenter: true)
         self.dataSource = self.generateDataSource()
+        self.view.backgroundColor = .white
     }
     public override func configureUI() {
         self.view.addSubview(self.scrollView)
@@ -112,7 +113,7 @@ public final class CreatePlansFeature: BaseFeature {
             .debug("selectedDate")
             .compactMap({ $0 })
             .map({ date in
-                date.toStringWithCustomFormat("MM. dd. HH:mm", locale: nil)
+                date.toStringWithCustomFormat(.yearToMinute, locale: nil)
             })
             .drive(with: self) { owner, dateString in
                 print(dateString)

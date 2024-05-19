@@ -34,19 +34,29 @@ public final class HomeViewModel: BaseViewModel {
     }
     
     public struct Output {
-        let Plans: Driver<[Plans]>
+        let plansArrInDate: Driver<[Plans]>
+        let plansArrIHad: Driver<[Plans]>
     }
     
     public func trnasform(input: Input) -> Output {
         let selectedDate = input.calendarViewSelectedDate.share()
         
-        let plans = input.viewDidAppear
-//            .debug("viewDidAppear")
+        let viewDidAppear = input.viewDidAppear.share()
+        
+        let plansArrIHad = viewDidAppear
+//            .debug("plansArrIHad")
             .withUnretained(self)
             .flatMap { owner, _ -> Observable<[Plans]> in
-                owner.fetchPlansUseCase.fetch(date: selectedDate)
+                owner.fetchPlansUseCase.fetch()
             }
-            .asDriver(onErrorJustReturn: [])
+        
+        let plansArrInDate = Observable.combineLatest(plansArrIHad, selectedDate)
+//            .debug("plansArrInDate")
+            .withUnretained(self)
+            .map { owner, val in
+                let (plansArr, date) = val
+                return owner.filterPlansArrInDate(plansArr: plansArr, selectedDate: date)
+            }
         
         input.plansDidSelect
 //            .debug("plansDidSelect")
@@ -63,11 +73,22 @@ public final class HomeViewModel: BaseViewModel {
             .disposed(by: self.disposeBag)
         
         
-        return Output(Plans: plans)
+        return Output(plansArrInDate: plansArrInDate.asDriver(onErrorJustReturn: []), plansArrIHad: plansArrIHad.asDriver(onErrorJustReturn: []))
     }
     
     public func setAction(_ actions: HomeViewModelActions) {
         self.actions = actions
     }
     
+}
+
+private extension HomeViewModel {
+    func filterPlansArrInDate(plansArr: [Plans], selectedDate: Date) -> [Plans] {
+        return plansArr.filter { plans in
+            let dateString = plans.date.toStringWithCustomFormat(.yearToDay)
+            let selectedDateString = selectedDate.toStringWithCustomFormat(.yearToDay)
+            
+            return selectedDateString == dateString
+        }
+    }
 }

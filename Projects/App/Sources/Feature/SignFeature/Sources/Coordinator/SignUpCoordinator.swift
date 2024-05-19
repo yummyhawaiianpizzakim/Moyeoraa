@@ -31,9 +31,11 @@ public final class SignUpCoordinator: CoordinatorProtocol {
     private func showSignUpFeature() {
         let firebaseService = FireBaseServiceImpl.shared
         let tokenManager = KeychainTokenManager.shared
-        let authRepository = AuthRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
         
-        let uploadImageUseCase = UploadImageUseCaseSpy()
+        let authRepository = AuthRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let imageRepository = ImageRepositoryImpl(fireBaseService: firebaseService, tokenManager: tokenManager)
+        
+        let uploadImageUseCase = UploadImageUseCaseImpl(imageRepository: imageRepository)
         let signUpUseCase = SignUpUseCaseImpl(authRepository: authRepository)
         
         let vm = SignUpViewModel(

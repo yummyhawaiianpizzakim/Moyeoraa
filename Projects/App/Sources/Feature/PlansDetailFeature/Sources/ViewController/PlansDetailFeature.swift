@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MapKit
 import SnapKit
 import RxSwift
 import RxCocoa
@@ -17,6 +18,8 @@ public final class PlansDetailFeature: BaseFeature {
     private let deletePlansTrigger = PublishRelay<Void>()
     
     private var dataSource: UICollectionViewDiffableDataSource<Int, User>?
+    
+    private var annotationView = MYRAnnotationView()
     
     private lazy var naviTitleView = MYRNavigationView(title: "")
     
@@ -39,9 +42,12 @@ public final class PlansDetailFeature: BaseFeature {
     
     private lazy var memberLabel = MYRLabel("", textColor: .neutral(.balck), font: .body1)
     
-    private lazy var mapView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .cyan
+    private lazy var mapView: MYRMapView = {
+        let view = MYRMapView(frame: .zero)
+        view.register(MYRAnnotationView.self, forAnnotationViewWithReuseIdentifier: "MYRAnnotationView")
+        view.addAnnotation(self.annotationView)
+        view.currentLocationButton.removeFromSuperview()
+        view.isUserInteractionEnabled = false
         return view
     }()
     
@@ -61,6 +67,8 @@ public final class PlansDetailFeature: BaseFeature {
     }
     
     public override func configureAttributes() {
+        self.view.backgroundColor = .white
+        self.mapView.delegate = self
         self.setNavigationBar(isBackButton: true, titleView: self.naviTitleView, rightButtonItem: self.menuButton)
         self.dataSource = self.generateDataSource()
     }
@@ -110,6 +118,7 @@ public final class PlansDetailFeature: BaseFeature {
     
     public override func bindViewModel() {
         let input = PlansDetailViewModel.Input(
+            viewDidAppear: self.rx.viewDidAppear.map({ _ in () }).asObservable(),
             enterChatButton: self.enterChatButton.rx.tap.asObservable(),
             deleteTrigger: self.deletePlansTrigger.asObservable()
         )
@@ -128,7 +137,7 @@ public final class PlansDetailFeature: BaseFeature {
         .disposed(by: self.disposeBag)
         
         output.date.drive(with: self) { owner, date in
-            let dateString = date.toStringWithCustomFormat("MM. dd. HH:mm")
+            let dateString = date.toStringWithCustomFormat(.yearToMinute)
             owner.dateLabel.setText(with: dateString)
         }
         .disposed(by: self.disposeBag)
@@ -145,6 +154,12 @@ public final class PlansDetailFeature: BaseFeature {
             owner.dataSource?.apply(snapshot)
         }
         .disposed(by: self.disposeBag)
+        
+        output.coordinate
+            .drive(with: self) { owner, coordinate in
+                owner.setMapView(coordinate)
+            }
+            .disposed(by: self.disposeBag)
         
         output.result
             .subscribe(with: self) { owner, _ in
@@ -244,5 +259,29 @@ private extension PlansDetailFeature {
         alert.addActions([cancel, logout])
         
         present(alert, animated: true, completion: nil)
+    }
+}
+
+extension PlansDetailFeature: MKMapViewDelegate {
+    private func setMapView(_ coordinate: Coordinate, animated: Bool = true) {
+        let coordinate2D = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lng)
+        guard !(coordinate2D.latitude == .zero) else { return }
+        
+        let span = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        let region = MKCoordinateRegion(center: coordinate2D, span: span)
+        
+        self.mapView.setRegion(region, animated: animated)
+        self.setAnnotation(to: coordinate)
+    }
+    
+    private func setAnnotation(to coordinate: Coordinate) {
+        self.annotationView.coordinate = CLLocationCoordinate2D(latitude: coordinate.lat, longitude: coordinate.lng)
+    }
+    
+    public func mapView(_ mapView: MKMapView, viewFor annotation: any MKAnnotation) -> MKAnnotationView? {
+        guard let annotationView = annotation as? MYRAnnotationView
+        else { return nil }
+        annotationView.image = .Moyeora.pin
+        return annotationView
     }
 }

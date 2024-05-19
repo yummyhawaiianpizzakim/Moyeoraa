@@ -32,6 +32,16 @@ public final class FetchPlansUseCaseSpy: FetchPlansUseCaseProtocol {
         return Observable.just(plans)
     }
     
+    public func fetch(chatRoomID: String) -> Observable<Plans> {
+        let plans = Plans(id: "1234", title: "스벅에서 만나기", date: Date(), location: "대연동 스벅", latitude: 0, longitude: 0, makingUserID: "qwer", usersID: ["qwer", "asdf", "zxcv"], chatRoomID: "zxcv", status: .active)
+        
+        return Observable.just(plans)
+    }
+    
+    public func fetch() -> Observable<[Plans]> {
+        return Observable.just([])
+    }
+    
     
 }
 

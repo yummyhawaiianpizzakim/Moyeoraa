@@ -43,8 +43,9 @@ public final class ModifyPlansFeature: BaseFeature {
     
     public override func configureAttributes() {
         let titleView = MYRNavigationView(title: "약속 수정")
-        self.setNavigationBar(isBackButton: true, titleView: titleView, rightButtonItem: nil)
+        self.setNavigationBar(isBackButton: true, titleView: titleView, rightButtonItem: nil, isSetTitleViewOnCenter: true)
         self.dataSource = self.generateDataSource()
+        self.view.backgroundColor = .white
     }
     public override func configureUI() {
         self.view.addSubview(self.scrollView)
@@ -89,6 +90,7 @@ public final class ModifyPlansFeature: BaseFeature {
     
     public override func bindViewModel() {
         let input = ModifyPlansViewModel.Input(
+            viewDidAppear: self.rx.viewDidAppear.map { _ in () }.asObservable(),
             titleText: self.contentView.titleTextField.rx.text.orEmpty.asObservable(),
             dateButtonDidTap: self.contentView.dateButton.rx.tap.asObservable(),
             locationButtonDidTap: self.contentView.locationButton.rx.tap.asObservable(),
@@ -118,7 +120,7 @@ public final class ModifyPlansFeature: BaseFeature {
 //            .debug("selectedDate")
             .compactMap({ $0 })
             .map({ date in
-                date.toStringWithCustomFormat("MM. dd. HH:mm", locale: nil)
+                date.toStringWithCustomFormat(.yearToMinute, locale: nil)
             })
             .drive(with: self) { owner, dateString in
                 print(dateString)
@@ -163,15 +165,18 @@ private extension ModifyPlansFeature {
             guard let self,
                   let tagCell = collectionView.dequeueCell(ModifyMemberTagCVC.self, for: indexPath)
             else { return UICollectionViewCell() }
-            
-            tagCell.bindCell(id: item.id, name: item.name)
+            let isMyself = self.viewModel.isMyself(id: item.id)
+            tagCell.bindCell(id: item.id, name: item.name, isMyself: isMyself)
             
             tagCell.tagView.xButton.rx.tap
                 .compactMap({ _ in
                     self.dataSource?.itemIdentifier(for: indexPath)
                 })
+                .filter({
+                    !self.viewModel.isMyself(id: $0.id)
+                })
                 .subscribe(onNext: { user in
-                    self.viewModel.deleteTagedUser(user)
+                    self.showDeleteTagedUserAlert(user: user)
                 })
                 .disposed(by: tagCell.disposeBag)
             
@@ -207,5 +212,22 @@ private extension ModifyPlansFeature {
             let memberCount = members.count - 1
             self.contentView.memberButton.setText(text: "\(name) 외 \(members.count - 1)명")
         }
+    }
+}
+private extension ModifyPlansFeature {
+    func showDeleteTagedUserAlert(user: User) {
+        let alert = MYRAlertController(
+            title: "추방하기",
+            message: "해당 유저를 추방하시겠습니까?\n 채팅방에서도 해당유저가 추방됩니다.",
+            preferredStyle: .alert
+        )
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
+        let block = UIAlertAction(title: "추방", style: .destructive) { [weak self] _ in
+            self?.viewModel.deleteTagedUser(user)
+        }
+        
+        alert.addActions([cancel, block])
+        
+        self.present(alert, animated: true, completion: nil)
     }
 }

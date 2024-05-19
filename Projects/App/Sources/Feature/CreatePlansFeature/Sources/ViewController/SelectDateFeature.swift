@@ -14,6 +14,8 @@ public final class SelectDateFeature: BaseFeature {
     
     private var dataSource: UICollectionViewDiffableDataSource<Int, Date>?
     
+    let titleView = MYRNavigationView(title: "약속 날짜")
+    
     private lazy var label = MYRLabel("원하시는 날짜와 시간을\n입력해주세요.", textColor: .neutral(.balck), font: .h2)
     
     private lazy var calendarView = MYRCalendarView(feature: .ceate)
@@ -42,6 +44,8 @@ public final class SelectDateFeature: BaseFeature {
     public override func configureAttributes() {
         self.label.numberOfLines = 0
         self.dataSource = self.generateDataSource()
+        self.setNavigationBar(isBackButton: true, titleView: self.titleView, rightButtonItem: nil, isSetTitleViewOnCenter: true)
+        self.view.backgroundColor = .white
     }
     
     public override func configureUI() {
@@ -90,7 +94,6 @@ public final class SelectDateFeature: BaseFeature {
             .compactMap { owner, indexPath in
                 owner.dataSource?.itemIdentifier(for: indexPath)
             }
-            .map({ $0.localizedDate() })
             .asObservable()
         
         let selectedDate = self.calendarView.selectedDate.asObservable()

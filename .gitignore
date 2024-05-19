@@ -101,6 +101,7 @@ XCConfig/*
 !XCConfig/Shared.xcconfig
 Tuist/Dependencies
 Derived/
+Signing/
 *.xcworkspace
 *.xcodeproj
 master.key

@@ -120,7 +120,7 @@ private extension MYRPlansCVC {
 
 public extension MYRPlansCVC {
     func bindCell(title: String, location: String, time: Date, countUser: Int) {
-        let timeString = time.toStringWithCustomFormat("HH:mm")
+        let timeString = time.toStringWithCustomFormat(.hourAndMinute)
         self.titleLabel.setText(with: title)
         self.locationInfoLabel.setText(with: location)
         self.timeInfoLabel.setText(with: timeString)

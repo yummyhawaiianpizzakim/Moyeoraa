@@ -11,6 +11,7 @@ import RxSwift
 
 public protocol FetchPlansUseCaseProtocol {
     func fetch(date: Observable<Date>) -> Observable<[Plans]>
-    
     func fetch(id: String) -> Observable<Plans>
+    func fetch(chatRoomID: String) -> Observable<Plans>
+    func fetch() -> Observable<[Plans]> 
 }

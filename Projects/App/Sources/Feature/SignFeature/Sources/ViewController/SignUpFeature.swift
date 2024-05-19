@@ -46,7 +46,7 @@ public final class SignUpFeature: BaseFeature {
     }
     
     public override func configureAttributes() {
-        self.setNavigationBar(isBackButton: true, titleView: self.navTitleView, rightButtonItem: nil)
+        self.setNavigationBar(isBackButton: true, titleView: self.navTitleView, rightButtonItem: nil, isSetTitleViewOnCenter: true)
         
         self.nameTextField.delegate = self
         self.doneButton.isEnabled = false

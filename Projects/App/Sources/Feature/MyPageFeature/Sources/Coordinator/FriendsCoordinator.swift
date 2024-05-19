@@ -28,15 +28,33 @@ public final class FriendsCoordinator: CoordinatorProtocol {
     }
     
     private func showFriendsFeature() {
-        let fetchFriendsUseCase = FetchFriendsUseCaseSpy()
-        let searchUserUseCase = SearchUserUseCaseSpy()
-        let createFriendUseCase = CreateFriendUseCaseSpy()
-        let deleteFriendUseCase = DeleteFriendUseCaseSpy()
+        let tokenManager = KeychainTokenManager.shared
+        let firebaseService = FireBaseServiceImpl.shared
+        
+        let friendRepository = FriendRepositoryImpl(fireBaseService: firebaseService, tokenManager: tokenManager)
+        let userRepository = UserRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        let blockRepository = BlockRepositoryImpl(firebaseService: firebaseService, tokenManager: tokenManager)
+        
+        let fetchFriendsUseCase = FetchFriendsUseCaseImpl(friendRepository: friendRepository)
+        let searchUserUseCase = SearchUserUseCaseImpl(userRepository: userRepository)
+        let createFriendUseCase = CreateFriendUseCaseImpl(friendRepository: friendRepository, userRepository: userRepository)
+        let deleteFriendUseCase = DeleteFriendUseCaseImpl(userRepository: userRepository, friendRepository: friendRepository)
+        let createBlockUseCase = CreateBlockUseCaseImpl(blockRepository: blockRepository)
+        let fetchBlockedUserUseCase = FetchBlockedUserUseCaseImpl(blockRepository: blockRepository, userRepository: userRepository)
+        
+//        let fetchFriendsUseCase = FetchFriendsUseCaseSpy()
+//        let searchUserUseCase = SearchUserUseCaseSpy()
+//        let createFriendUseCase = CreateFriendUseCaseSpy()
+//        let deleteFriendUseCase = DeleteFriendUseCaseSpy()
+        
         let vm = FriendsViewModel(
             fetchFriendsUseCase: fetchFriendsUseCase,
             searchUserUseCase: searchUserUseCase,
             createFriendUseCase: createFriendUseCase,
-            deleteFriendUseCase: deleteFriendUseCase)
+            deleteFriendUseCase: deleteFriendUseCase,
+            createBlockUseCase: createBlockUseCase,
+            fetchBlockedUserUseCase: fetchBlockedUserUseCase
+        )
         
         let vc = FriendsFeature(viewModel: vm)
         

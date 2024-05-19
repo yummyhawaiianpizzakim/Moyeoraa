@@ -16,5 +16,7 @@ public final class DeleteFriendUseCaseSpy: DeleteFriendUseCaseProtocol {
         return Observable.just(())
     }
     
-    
+    public func delete(friendID: String) -> Observable<Void> {
+        return Observable.just(())
+    }
 }

@@ -1,4 +1,5 @@
 import UIKit
+import MapKit
 import FirebaseMessaging
 import FirebaseCore
 
@@ -6,6 +7,7 @@ import FirebaseCore
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     private let tokenManager: TokenManagerProtocol = KeychainTokenManager.shared
+    private var locationManager: CLLocationManager?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -13,9 +15,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         UNUserNotificationCenter.current().delegate = self
         Messaging.messaging().delegate = self
-        
         self.requestNotificationAuthorization()
         application.registerForRemoteNotifications()
+        
+        self.locationManager = CLLocationManager()
+        self.locationManager?.delegate = self
+        self.requestLocationAuthorization()
         
         return true
     }
@@ -65,6 +70,34 @@ extension AppDelegate : MessagingDelegate {
             return
         }
         self.tokenManager.save(token: fcmToken, with: .fcmToken)
-        print(fcmToken)
+        
+//        print(fcmToken)
+    }
+}
+
+// MARK: - CoreLocation
+extension AppDelegate: CLLocationManagerDelegate {
+    func requestLocationAuthorization() {
+        locationManager?.requestWhenInUseAuthorization()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        
+        switch status {
+        case .notDetermined:
+            print("notDetermined")
+        case .restricted:
+            print("restricted")
+        case .denied:
+            print("denied")
+        case .authorizedAlways:
+            print("authorizedAlways")
+        case .authorizedWhenInUse:
+            print("authorizedWhenInUse")
+        case .authorized:
+            print("authorized")
+        @unknown default:
+            fatalError()
+        }
     }
 }

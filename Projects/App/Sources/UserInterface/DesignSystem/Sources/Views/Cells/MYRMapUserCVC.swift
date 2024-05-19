@@ -51,6 +51,9 @@ private extension MYRMapUserCVC {
         self.userName.numberOfLines = 1
         self.arrivedStateLabel.numberOfLines = 1
         self.arrivedStateLabel.textAlignment = .center
+        self.userName.textAlignment = .center
+        self.contentView.backgroundColor = .moyeora(.neutral(.white))
+        self.contentView.clipsToBounds = true
     }
     
     func configureUI() {
@@ -96,6 +99,7 @@ public extension MYRMapUserCVC {
     func bindCell(profileURL: String, userName: String) {
         self.profileView.bindImage(urlString: profileURL)
         self.userName.setText(with: userName)
+        self.userName.textAlignment = .center
     }
     
     func bindIsArrived(_ isArrived: Bool) {

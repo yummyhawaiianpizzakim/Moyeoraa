@@ -8,7 +8,9 @@ import ProjectDescriptionHelpers
 let configurations: [Configuration] = .default
 
 let settings: Settings = .settings(
-    base: env.baseSetting,
+    base: env.baseSetting
+        .merging(.codeSign)
+    ,
     configurations: configurations,
     defaultSettings: .recommended
 )

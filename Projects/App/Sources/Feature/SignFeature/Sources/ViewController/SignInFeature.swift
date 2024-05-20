@@ -163,7 +163,7 @@ private extension SignInFeature {
     }
     
     func openPrivacyPolicy() {
-        guard let url = URL(string: "asdkf") else { return }
+        guard let url = URL(string: "https://pickled-tachometer-184.notion.site/49801e583e464574beb189f78bc2b6c1") else { return }
         
         if UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)

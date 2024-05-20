@@ -57,6 +57,7 @@ public final class FriendsCoordinator: CoordinatorProtocol {
         )
         
         let vc = FriendsFeature(viewModel: vm)
+        vc.hidesBottomBarWhenPushed = true
         
         self.navigation.pushViewController(vc, animated: true)
     }

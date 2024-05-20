@@ -49,6 +49,7 @@ public final class BlockUserCoordinator: CoordinatorProtocol {
         )
         
         let vc = BlockUserFeature(viewModel: vm)
+        vc.hidesBottomBarWhenPushed = true
         
         self.navigation.pushViewController(vc, animated: true)
     }

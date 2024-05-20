@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -58,13 +60,13 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>위치공유 기능을 사용하기 위해서 위치정보 권한이 필요합니다.</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>위치공유 기능을 사용하기 위해서 위치정보 권한이 필요합니다.</string>
-    <key>NSLocationUsageDescription</key>
-    <string>위치공유 기능을 사용하기 위해서 위치정보 권한이 필요합니다.</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>위치공유 기능을 사용하기 위해서 위치정보 권한이 필요합니다.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>위치공유 기능을 사용하기 위해서 위치정보 권한이 필요합니다.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>위치공유 기능을 사용하기 위해서 위치정보 권한이 필요합니다.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>위치공유 기능을 사용하기 위해서 위치정보 권한이 필요합니다.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>위치공유 기능을 사용하기 위해서 위치정보 권한이 필요합니다.</string>
 </dict>
 </plist>

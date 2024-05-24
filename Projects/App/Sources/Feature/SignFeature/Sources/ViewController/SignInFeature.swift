@@ -107,7 +107,7 @@ public final class SignInFeature: BaseFeature {
         
         output.signUpSuccess
             .emit(with: self) { owner, _ in
-                let toastView = MYRToastView(type: .failure, message: "회원가입에 성공했습니다. 다시로그인 해 주세요", followsUndockedKeyboard: false)
+                let toastView = MYRToastView(type: .success, message: "회원가입에 성공했습니다. 다시 로그인 해 주세요", followsUndockedKeyboard: false)
                 toastView.show(in: owner.view)
                 
                 owner.isHiddenActivityIndicator(true)

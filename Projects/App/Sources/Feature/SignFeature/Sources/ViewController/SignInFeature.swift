@@ -45,12 +45,14 @@ public final class SignInFeature: BaseFeature {
     }
     
     public override func configureAttributes() {
-        
+        self.isHiddenActivityIndicator(true)
     }
     
     public override func configureUI() {
         [self.logoImageView, self.appleSignInButton, self.privacyPolicyButton]
             .forEach { self.view.addSubview($0) }
+        
+        self.view.addSubview(self.activityIndicator)
         
         self.logoImageView.snp.makeConstraints { make in
             make.centerY.equalToSuperview().multipliedBy(0.8)
@@ -69,6 +71,9 @@ public final class SignInFeature: BaseFeature {
             make.centerX.equalToSuperview()
         }
         
+        self.activityIndicator.snp.makeConstraints { make in
+            make.centerX.centerY.equalToSuperview()
+        }
     }
     
     private func bindUI() {
@@ -95,7 +100,18 @@ public final class SignInFeature: BaseFeature {
         output.signInFailure
             .emit(with: self) { owner, _ in
                 let toastView = MYRToastView(type: .failure, message: "로그인에 실패했습니다. 나중에 다시해주세요.", followsUndockedKeyboard: false)
-                toastView.show(in: self.view)
+                toastView.show(in: owner.view)
+                owner.isHiddenActivityIndicator(true)
+            }
+            .disposed(by: self.disposeBag)
+        
+        output.signUpSuccess
+            .emit(with: self) { owner, _ in
+                let toastView = MYRToastView(type: .success, message: "회원가입에 성공했습니다. 다시 로그인 해 주세요", followsUndockedKeyboard: false)
+                toastView.show(in: owner.view)
+                
+                owner.isHiddenActivityIndicator(true)
+                owner.loginButtonDidTap()
             }
             .disposed(by: self.disposeBag)
     }
@@ -190,10 +206,7 @@ extension SignInFeature: ASAuthorizationControllerDelegate {
         controller: ASAuthorizationController,
         didCompleteWithAuthorization authorization: ASAuthorization
     ) {
-        self.view.addSubview(self.activityIndicator)
-        self.activityIndicator.snp.makeConstraints { make in
-            make.centerX.centerY.equalToSuperview()
-        }
+        self.isHiddenActivityIndicator(false)
         
         guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential else { return }
         guard let nonce = self.currentNonce,
@@ -220,6 +233,10 @@ extension SignInFeature: ASAuthorizationControllerDelegate {
     
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         print("Sign in with Apple errored: \(error)")
+    }
+    
+    func isHiddenActivityIndicator(_ bool: Bool) {
+        self.activityIndicator.isHidden = bool
     }
 }
 

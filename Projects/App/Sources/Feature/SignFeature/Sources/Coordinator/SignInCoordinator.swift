@@ -17,6 +17,8 @@ public final class SignInCoordinator: CoordinatorProtocol {
     
     public let navigation: UINavigationController
     
+    private var viewController: SignInFeature?
+    
     public init(navigation: UINavigationController) {
         self.navigation = navigation
     }
@@ -48,6 +50,8 @@ public final class SignInCoordinator: CoordinatorProtocol {
         
         let vc = SignInFeature(viewModel: vm)
         
+        self.viewController = vc
+        
         self.navigation.pushViewController(vc, animated: true)
     }
     
@@ -66,7 +70,9 @@ public final class SignInCoordinator: CoordinatorProtocol {
 
 extension SignInCoordinator: CoordinatorFinishDelegate {
     public func coordinatorDidFinished(childCoordinator: CoordinatorProtocol) {
-        
+        if childCoordinator.type == .signUp {
+            self.viewController?.viewModel.signUpSuccess.accept(())
+        }
     }
     
 }

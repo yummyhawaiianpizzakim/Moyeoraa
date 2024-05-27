@@ -33,14 +33,26 @@ public final class ImageRepositoryImpl: ImageRepositoryProtocol {
         guard let id = self.tokenManager.getToken(with: .userId)
         else { return .error(TokenManagerError.notFound) }
         
-        return self.fireBaseService.getDocument(collection: .users, document: id)
+//        return self.fireBaseService.getDocument(collection: .users, document: id)
+//            .asObservable()
+//            .map { $0.toObject(UserDTO.self)?.toEntity() }
+//            .compactMap { $0?.profileImage }
+//            .withUnretained(self)
+//            .flatMap { owner, imageString in
+//                owner.deleteImage(imageString: imageString)
+//            }
+//            .catchAndReturn(())
+        
+        return self.fireBaseService
+            .getDocument(collection: .users, document: id)
             .asObservable()
             .map { $0.toObject(UserDTO.self)?.toEntity() }
-            .compactMap { $0?.profileImage }
-            .withUnretained(self)
-            .flatMap { owner, imageString in
-                owner.deleteImage(imageString: imageString)
+            .flatMap { user -> Observable<Void> in
+                guard let profileImage = user?.profileImage else {
+                    return .just(())
+                }
+                return self.deleteImage(imageString: profileImage)
+                    .catchAndReturn(())
             }
-            .catchAndReturn(())
     }
 }

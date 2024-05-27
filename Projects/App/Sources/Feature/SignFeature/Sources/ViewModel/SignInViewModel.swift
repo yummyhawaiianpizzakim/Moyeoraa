@@ -20,6 +20,7 @@ public final class SignInViewModel: BaseViewModel {
     public let disposeBag = DisposeBag()
     public var actions: Action?
     private let signInFailure = PublishRelay<Void>()
+    public let signUpSuccess = PublishRelay<Void>()
     
     private let signInUseCase: SignInUseCaseProtocol
     
@@ -36,10 +37,12 @@ public final class SignInViewModel: BaseViewModel {
     
     public struct Output {
         let signInFailure: Signal<Void>
+        let signUpSuccess: Signal<Void>
     }
     
     public func trnasform(input: Input) -> Output {
-        return Output(signInFailure: signInFailure.asSignal())
+        return Output(signInFailure: signInFailure.asSignal(),
+                      signUpSuccess: signUpSuccess.asSignal())
     }
     
     public func setAction(_ actions: SignInViewModelActions) {

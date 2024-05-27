@@ -19,7 +19,7 @@ public final class SignUpFeature: BaseFeature {
     
     private lazy var navTitleView = MYRNavigationView(title: "회원가입")
     
-    private lazy var descriptionLabel = MYRLabel("프로필 사진과 이름을 입력해주세요.", textColor: .neutral(.balck), font: .subtitle1)
+    private lazy var descriptionLabel = MYRLabel("프로필 사진과 닉네임을 입력해주세요.", textColor: .neutral(.balck), font: .subtitle1)
     
     private lazy var editProfileButton: MYRProfileButton = {
         let button = MYRProfileButton(size: .init(width: 96, height: 96))
@@ -33,7 +33,7 @@ public final class SignUpFeature: BaseFeature {
         return imagePicker
     }()
     
-    private lazy var nameLabel = MYRLabel("이름", textColor: .neutral(.balck), font: .h2)
+    private lazy var nameLabel = MYRLabel("닉네임", textColor: .neutral(.balck), font: .h2)
     
     private lazy var nameTextField = MYRIconTextField(icon: .Moyeora.edit)
     
